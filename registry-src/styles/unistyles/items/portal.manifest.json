@@ -7,17 +7,17 @@
   "files": [
     {
       "source": "primitives/portal/PortalProvider.tsx",
-      "path": "lib/portal/PortalProvider.tsx",
+      "path": "lib/portal/portal-provider.tsx",
       "type": "registry:lib"
     },
     {
       "source": "primitives/portal/PortalHost.tsx",
-      "path": "lib/portal/PortalHost.tsx",
+      "path": "lib/portal/portal-host.tsx",
       "type": "registry:lib"
     },
     {
       "source": "primitives/portal/Portal.tsx",
-      "path": "lib/portal/Portal.tsx",
+      "path": "lib/portal/portal.tsx",
       "type": "registry:lib"
     },
     {

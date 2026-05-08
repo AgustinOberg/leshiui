@@ -1,4 +1,5 @@
-import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises"
+import type { Dirent } from "node:fs"
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import AjvModule, { type ErrorObject } from "ajv"
@@ -9,8 +10,33 @@ import draft07MetaSchema from "ajv/dist/refs/json-schema-draft-07.json" with {
   type: "json",
 }
 
-const REGISTRY_NAME = "shadniwind"
-const REGISTRY_HOMEPAGE = "https://github.com/deicod/shadniwind"
+// ---------------------------------------------------------------------------
+// Configuration
+// ---------------------------------------------------------------------------
+
+/**
+ * Public registry name. Used as the `name` field in the top-level index.
+ */
+const REGISTRY_NAME = "leshi-ui"
+
+/**
+ * Public hosting base URL. Items are published at
+ * `<REGISTRY_BASE_URL>/<REGISTRY_VERSION>/styles/<style>/r/<name>.json`.
+ *
+ * Change this constant when migrating hosting.
+ */
+const REGISTRY_BASE_URL = "https://leshi-ui.pages.dev"
+
+/**
+ * Repository homepage. Surfaced in the top-level index.
+ */
+const REGISTRY_HOMEPAGE = "https://github.com/AgustinOberg/leshiui"
+
+/**
+ * Versioned URL prefix. Bump when a breaking change to the URL scheme or
+ * manifest format is required and run `v1` and `v2` in parallel for some
+ * deprecation window.
+ */
 const REGISTRY_VERSION = "v1"
 
 const REGISTRY_TYPES = [
@@ -31,7 +57,13 @@ const REGISTRY_TYPES = [
 type RegistryType = (typeof REGISTRY_TYPES)[number]
 
 type ManifestFile = {
+  /**
+   * Source path. Default is relative to `registry-src/styles/<style>/`. Prefix
+   * with `core:` to read from `registry-src/core/` instead. The prefix is
+   * stripped before the file is embedded; consumers never see it.
+   */
   source: string
+  /** Install path inside the consumer's project (kebab-case convention). */
   path: string
   type: RegistryType
   target?: string
@@ -73,19 +105,37 @@ type RegistryIndex = {
   items: Array<Omit<RegistryItem, "files">>
 }
 
+type TopLevelIndex = {
+  name: string
+  homepage: string
+  baseUrl: string
+  version: string
+  styles: Array<{
+    name: string
+    itemCount: number
+    registryUrl: string
+  }>
+}
+
 const CURRENT_FILE = fileURLToPath(import.meta.url)
 const ROOT_DIR = path.resolve(path.dirname(CURRENT_FILE), "..")
-const MANIFESTS_DIR = path.join(ROOT_DIR, "registry-src", "items")
-const SOURCE_DIR = path.join(ROOT_DIR, "registry-src", "shadniwind")
+const REGISTRY_SRC_DIR = path.join(ROOT_DIR, "registry-src")
+const CORE_DIR = path.join(REGISTRY_SRC_DIR, "core")
+const STYLES_DIR = path.join(REGISTRY_SRC_DIR, "styles")
 const OUTPUT_DIR = path.join(ROOT_DIR, "public")
 const OUTPUT_VERSION_DIR = path.join(OUTPUT_DIR, REGISTRY_VERSION)
-const OUTPUT_ITEMS_DIR = path.join(OUTPUT_DIR, "r")
-const OUTPUT_VERSION_ITEMS_DIR = path.join(OUTPUT_VERSION_DIR, "r")
+const OUTPUT_STYLES_DIR = path.join(OUTPUT_VERSION_DIR, "styles")
 const SCHEMA_DIR = path.join(ROOT_DIR, "schemas")
 const ITEM_SCHEMA_PATH = path.join(SCHEMA_DIR, "registry-item.schema.json")
 const REGISTRY_SCHEMA_PATH = path.join(SCHEMA_DIR, "registry.schema.json")
 
 const REGISTRY_TYPE_SET = new Set<string>(REGISTRY_TYPES)
+
+const CORE_PREFIX = "core:"
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
@@ -123,19 +173,14 @@ function getRequiredString(value: unknown, label: string): string {
   if (typeof value !== "string" || value.trim() === "") {
     throw new Error(`${label} must be a non-empty string`)
   }
-
   return value
 }
 
 function getOptionalString(value: unknown, label: string): string | undefined {
-  if (value === undefined) {
-    return undefined
-  }
-
+  if (value === undefined) return undefined
   if (typeof value !== "string") {
     throw new Error(`${label} must be a string`)
   }
-
   return value
 }
 
@@ -143,17 +188,13 @@ function getOptionalStringArray(
   value: unknown,
   label: string,
 ): string[] | undefined {
-  if (value === undefined) {
-    return undefined
-  }
-
+  if (value === undefined) return undefined
   if (
     !Array.isArray(value) ||
     value.some((entry) => typeof entry !== "string")
   ) {
     throw new Error(`${label} must be an array of strings`)
   }
-
   return value
 }
 
@@ -161,26 +202,25 @@ function getOptionalObject(
   value: unknown,
   label: string,
 ): Record<string, unknown> | undefined {
-  if (value === undefined) {
-    return undefined
-  }
-
+  if (value === undefined) return undefined
   if (!isPlainObject(value)) {
     throw new Error(`${label} must be an object`)
   }
-
   return value
 }
 
 async function readJsonFile<T>(filePath: string): Promise<T> {
   const raw = await readFile(filePath, "utf8")
-
   try {
     return JSON.parse(raw) as T
   } catch (error) {
     throw new Error(`Failed to parse JSON at ${filePath}`, { cause: error })
   }
 }
+
+// ---------------------------------------------------------------------------
+// Manifest parsing
+// ---------------------------------------------------------------------------
 
 async function loadManifest(filePath: string): Promise<Manifest> {
   const raw = await readJsonFile<unknown>(filePath)
@@ -206,10 +246,26 @@ async function loadManifest(filePath: string): Promise<Manifest> {
       throw new Error(`manifest.files[${index}] must be an object`)
     }
 
-    const source = assertSafeRelativePath(
-      getRequiredString(entry.source, `manifest.files[${index}].source`),
+    const rawSource = getRequiredString(
+      entry.source,
       `manifest.files[${index}].source`,
     )
+
+    // Allow the `core:` prefix to address files in registry-src/core/.
+    let source: string
+    if (rawSource.startsWith(CORE_PREFIX)) {
+      const stripped = rawSource.slice(CORE_PREFIX.length)
+      source = `${CORE_PREFIX}${assertSafeRelativePath(
+        stripped,
+        `manifest.files[${index}].source`,
+      )}`
+    } else {
+      source = assertSafeRelativePath(
+        rawSource,
+        `manifest.files[${index}].source`,
+      )
+    }
+
     const filePathValue = assertSafeRelativePath(
       getRequiredString(entry.path, `manifest.files[${index}].path`),
       `manifest.files[${index}].path`,
@@ -285,91 +341,215 @@ function buildItemBase(manifest: Manifest): Omit<RegistryItem, "files"> {
     type: manifest.type,
   }
 
-  if (manifest.title) {
-    item.title = manifest.title
-  }
-  if (manifest.description) {
-    item.description = manifest.description
-  }
-  if (manifest.author) {
-    item.author = manifest.author
-  }
-  if (manifest.dependencies?.length) {
-    item.dependencies = manifest.dependencies
-  }
+  if (manifest.title) item.title = manifest.title
+  if (manifest.description) item.description = manifest.description
+  if (manifest.author) item.author = manifest.author
+  if (manifest.dependencies?.length) item.dependencies = manifest.dependencies
   if (manifest.devDependencies?.length) {
     item.devDependencies = manifest.devDependencies
   }
   if (manifest.registryDependencies?.length) {
     item.registryDependencies = manifest.registryDependencies.map(
       (dependency) => {
-        if (dependency.startsWith("@")) {
-          return dependency
-        }
-
+        if (dependency.startsWith("@")) return dependency
         return `@${REGISTRY_NAME}/${dependency}`
       },
     )
   }
-  if (manifest.docs) {
-    item.docs = manifest.docs
-  }
-  if (manifest.categories?.length) {
-    item.categories = manifest.categories
-  }
+  if (manifest.docs) item.docs = manifest.docs
+  if (manifest.categories?.length) item.categories = manifest.categories
   if (manifest.meta && Object.keys(manifest.meta).length > 0) {
     item.meta = manifest.meta
   }
-  if (manifest.extends) {
-    item.extends = manifest.extends
-  }
-  if (manifest.style) {
-    item.style = manifest.style
-  }
-  if (manifest.iconLibrary) {
-    item.iconLibrary = manifest.iconLibrary
-  }
-  if (manifest.baseColor) {
-    item.baseColor = manifest.baseColor
-  }
-  if (manifest.theme) {
-    item.theme = manifest.theme
-  }
-  if (manifest.font) {
-    item.font = manifest.font
-  }
+  if (manifest.extends) item.extends = manifest.extends
+  if (manifest.style) item.style = manifest.style
+  if (manifest.iconLibrary) item.iconLibrary = manifest.iconLibrary
+  if (manifest.baseColor) item.baseColor = manifest.baseColor
+  if (manifest.theme) item.theme = manifest.theme
+  if (manifest.font) item.font = manifest.font
 
   return item
 }
 
-function isSelfPlatformWrapperImport(
-  sourcePath: string,
-  relativeSpecifier: string,
-): boolean {
-  const sourcePathPosix = toPosixPath(sourcePath)
-  const sourceDir = path.posix.dirname(sourcePathPosix)
-  const sourceBaseName = path.posix.basename(sourcePathPosix)
+// ---------------------------------------------------------------------------
+// Source resolution + import rewriting
+// ---------------------------------------------------------------------------
 
-  const wrapperMatch = sourceBaseName.match(
-    /^(?<base>.+)\.(web|native|ios|android)\.(tsx|ts|jsx|js)$/,
-  )
-  if (!wrapperMatch?.groups?.base) {
-    return false
+/**
+ * Resolve a manifest `source` to an absolute filesystem path.
+ * Honors the `core:` prefix.
+ */
+function resolveSourcePath(source: string, styleDir: string): string {
+  if (source.startsWith(CORE_PREFIX)) {
+    const rel = source.slice(CORE_PREFIX.length)
+    const abs = path.resolve(CORE_DIR, rel)
+    if (!abs.startsWith(CORE_DIR + path.sep)) {
+      throw new Error(`core: source escapes core root: ${source}`)
+    }
+    return abs
   }
 
-  const wrapperBasePath = path.posix.normalize(
-    path.posix.join(sourceDir, wrapperMatch.groups.base),
-  )
-  const resolvedImportPath = path.posix.normalize(
-    path.posix.join(sourceDir, relativeSpecifier),
-  )
-
-  return resolvedImportPath === wrapperBasePath
+  const abs = path.resolve(styleDir, source)
+  if (!abs.startsWith(styleDir + path.sep)) {
+    throw new Error(`source escapes style root: ${source}`)
+  }
+  return abs
 }
 
-function rewriteRelativeJsSpecifiersForRegistry(
+/**
+ * Build a map of every file in a manifest, keyed by its absolute source path
+ * with all common extensions exhausted. The map's value is the file's install
+ * path (the `path` field from the manifest, kebab-case).
+ *
+ * The map is used by the import rewriter to translate cross-tree relative
+ * imports in source code into install-relative paths in the published item.
+ */
+function buildSourceMap(
+  manifest: Manifest,
+  styleDir: string,
+): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const file of manifest.files) {
+    const absSource = resolveSourcePath(file.source, styleDir)
+    map.set(absSource, file.path)
+  }
+  return map
+}
+
+const RELATIVE_IMPORT_RE =
+  /(\bfrom\s+["']|\bexport\s+[^\n;]*\s+from\s+["'])(\.{1,2}\/[^"']+)(["'])/g
+
+const STRIP_TRAILING_EXTS = /\.(tsx?|d\.ts|jsx?)$/
+
+/**
+ * Detect whether `specifier` (a relative import path) imports the wrapped
+ * platform-specific file from the current module's `*.web|native|ios|android.*`
+ * wrapper. The bundler resolves these implicitly, so the existing convention
+ * is to leave the import untouched (preserve the `.js` extension).
+ */
+function isSelfPlatformWrapperImport(
+  fromAbsSource: string,
+  specifier: string,
+): boolean {
+  const fromPosix = toPosixPath(fromAbsSource)
+  const fromDir = path.posix.dirname(fromPosix)
+  const fromBase = path.posix.basename(fromPosix)
+
+  const wrapperMatch = fromBase.match(
+    /^(?<base>.+)\.(web|native|ios|android)\.(tsx|ts|jsx|js)$/,
+  )
+  if (!wrapperMatch?.groups?.base) return false
+
+  const wrapperBaseAbs = path.posix.normalize(
+    path.posix.join(fromDir, wrapperMatch.groups.base),
+  )
+  const resolvedAbs = path.posix.normalize(
+    path.posix.join(fromDir, specifier.replace(/\.js$/, "")),
+  )
+
+  return resolvedAbs === wrapperBaseAbs
+}
+
+/**
+ * Resolve a relative `.js` specifier to one of the absolute source paths in
+ * the source map. Returns `null` if the import does not point at a file the
+ * manifest declares (in which case it is left untouched).
+ */
+function findInSourceMap(
+  specifier: string,
+  fromAbsSource: string,
+  sourceMap: Map<string, string>,
+): { abs: string; install: string } | null {
+  const fromDir = path.dirname(fromAbsSource)
+  const cleaned = specifier.replace(/\.js$/, "")
+  const baseAbs = path.resolve(fromDir, cleaned)
+
+  // Try the source map with various extensions / index variants.
+  const candidates = [
+    `${baseAbs}.ts`,
+    `${baseAbs}.tsx`,
+    `${baseAbs}.d.ts`,
+    `${baseAbs}.js`,
+    path.join(baseAbs, "index.ts"),
+    path.join(baseAbs, "index.tsx"),
+    baseAbs,
+  ]
+
+  for (const cand of candidates) {
+    const install = sourceMap.get(cand)
+    if (install) return { abs: cand, install }
+  }
+  return null
+}
+
+/**
+ * Rewrite relative imports in source code into install-relative imports.
+ *
+ * Two cases handled:
+ *
+ *   1. Sibling / nested-within-style imports (e.g. `from "./portal-store.js"`):
+ *      strip the `.js` extension and produce an install-relative path. This
+ *      mirrors the consumer-side convention (no explicit `.js` extension).
+ *   2. Cross-tree imports (e.g. `from "../../../core/tokens/default.js"` from
+ *      a file in `styles/unistyles/lib/`): resolve to the absolute source path
+ *      of the target, look up its install path in the source map, and emit
+ *      an install-relative path.
+ *
+ * Imports that are not relative (package imports like `react-native-unistyles`)
+ * or that resolve outside the manifest's file set (the rare case of an
+ * out-of-scope file) are left untouched.
+ *
+ * Self-platform-wrapper imports (`focus-scope.tsx` importing
+ * `./focus-scope.web.js`) preserve the `.js` extension stripping behavior of
+ * the previous implementation, because RN's bundler resolves the platform
+ * suffix implicitly.
+ */
+function rewriteImports(
   content: string,
-  sourcePath: string,
+  fromAbsSource: string,
+  fromInstallPath: string,
+  sourceMap: Map<string, string>,
+): string {
+  const fromInstallDir = path.posix.dirname(toPosixPath(fromInstallPath))
+
+  return content.replace(
+    RELATIVE_IMPORT_RE,
+    (full, prefix, specifier, suffix) => {
+      // Try to look up the import target in the manifest's source map.
+      const match = findInSourceMap(specifier, fromAbsSource, sourceMap)
+
+      if (!match) {
+        // Not in our manifest. Keep the original specifier — the bundler will
+        // resolve at install time. (Platform wrappers and any out-of-scope
+        // files land here.)
+        return full
+      }
+
+      // Compute install-relative path from our file to the target.
+      let rel = path.posix.relative(
+        fromInstallDir,
+        toPosixPath(match.install),
+      )
+      rel = rel.replace(STRIP_TRAILING_EXTS, "")
+      if (!rel.startsWith(".")) rel = `./${rel}`
+
+      return `${prefix}${rel}${suffix}`
+    },
+  )
+}
+
+/**
+ * Final cleanup pass. Strips any remaining `.js` extensions on relative
+ * imports that the source-map-based rewriter left untouched (i.e., imports
+ * that point at files outside the manifest, like platform wrappers).
+ *
+ * Self-platform-wrapper imports are preserved (a `.web.tsx` file's import of
+ * its base name keeps its specifier intact so RN's bundler can resolve the
+ * platform suffix automatically).
+ */
+function stripExtensionFromExternalImports(
+  content: string,
+  fromAbsSource: string,
 ): string {
   const rewrite = (
     full: string,
@@ -377,43 +557,45 @@ function rewriteRelativeJsSpecifiersForRegistry(
     specifier: string,
     suffix: string,
   ): string => {
-    if (isSelfPlatformWrapperImport(sourcePath, specifier)) {
-      return full
-    }
-
-    return `${prefix}${specifier}${suffix}`
+    if (isSelfPlatformWrapperImport(fromAbsSource, specifier)) return full
+    return `${prefix}${specifier.replace(/\.js$/, "")}${suffix}`
   }
 
-  return content
-    .replace(/(\bfrom\s+["'])(\.{1,2}\/[^"']+)\.js(["'])/g, rewrite)
-    .replace(
-      /(\bexport\s+[^\n;]*\s+from\s+["'])(\.{1,2}\/[^"']+)\.js(["'])/g,
-      rewrite,
-    )
+  return content.replace(
+    /(\bfrom\s+["'])(\.{1,2}\/[^"']+\.js)(["'])/g,
+    rewrite,
+  )
 }
 
-async function buildRegistryItem(manifest: Manifest): Promise<RegistryItem> {
+// ---------------------------------------------------------------------------
+// Item building
+// ---------------------------------------------------------------------------
+
+async function buildRegistryItem(
+  manifest: Manifest,
+  styleDir: string,
+): Promise<RegistryItem> {
+  const sourceMap = buildSourceMap(manifest, styleDir)
+
   const files = await Promise.all(
     manifest.files.map(async (file) => {
-      const sourcePath = path.resolve(SOURCE_DIR, file.source)
-      if (!sourcePath.startsWith(SOURCE_DIR + path.sep)) {
-        throw new Error(
-          `Source path escapes registry source root: ${file.source}`,
-        )
-      }
-
+      const sourcePath = resolveSourcePath(file.source, styleDir)
       const sourceContent = await readFile(sourcePath, "utf8")
-      const content = rewriteRelativeJsSpecifiersForRegistry(
+
+      const rewritten = rewriteImports(
         sourceContent,
         sourcePath,
+        file.path,
+        sourceMap,
       )
+      const cleaned = stripExtensionFromExternalImports(rewritten, sourcePath)
 
       return {
         path: file.path,
-        content,
+        content: cleaned,
         type: file.type,
         target: file.target,
-      }
+      } satisfies RegistryFile
     }),
   )
 
@@ -423,34 +605,58 @@ async function buildRegistryItem(manifest: Manifest): Promise<RegistryItem> {
   }
 }
 
-async function writeJson(filePath: string, data: unknown): Promise<void> {
-  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8")
-}
+// ---------------------------------------------------------------------------
+// Style discovery
+// ---------------------------------------------------------------------------
 
-async function clearJsonOutputs(dirPath: string): Promise<void> {
+async function discoverStyles(): Promise<string[]> {
+  let entries: Dirent[]
   try {
-    const entries = await readdir(dirPath, { withFileTypes: true })
-    await Promise.all(
-      entries
-        .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
-        .map((entry) => unlink(path.join(dirPath, entry.name))),
-    )
+    entries = (await readdir(STYLES_DIR, { withFileTypes: true })) as Dirent[]
   } catch (error) {
     if (
       error instanceof Error &&
       (error as NodeJS.ErrnoException).code === "ENOENT"
     ) {
-      return
+      return []
     }
     throw error
   }
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b))
 }
 
-function formatAjvErrors(errors: ErrorObject[] | null | undefined): string {
-  if (!errors || errors.length === 0) {
-    return "Unknown schema validation error"
+async function discoverManifestFiles(stylesItemsDir: string): Promise<string[]> {
+  let entries: Dirent[]
+  try {
+    entries = (await readdir(stylesItemsDir, {
+      withFileTypes: true,
+    })) as Dirent[]
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      return []
+    }
+    throw error
   }
 
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".manifest.json"))
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b))
+}
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+function formatAjvErrors(errors: ErrorObject[] | null | undefined): string {
+  if (!errors || errors.length === 0) return "Unknown schema validation error"
   return errors
     .map((error) => {
       const location = error.instancePath || "/"
@@ -465,49 +671,86 @@ function assertValid(
   errors: ErrorObject[] | null | undefined,
   label: string,
 ) {
-  if (valid) {
-    return
-  }
-
+  if (valid) return
   throw new Error(
     `Schema validation failed for ${label}:\n${formatAjvErrors(errors)}`,
   )
 }
 
-async function main() {
-  const entries = await readdir(MANIFESTS_DIR, { withFileTypes: true })
-  const manifestFiles = entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".manifest.json"))
-    .map((entry) => entry.name)
-    .sort((a, b) => a.localeCompare(b))
+// ---------------------------------------------------------------------------
+// Output
+// ---------------------------------------------------------------------------
 
-  if (manifestFiles.length === 0) {
-    throw new Error("No manifest files found in registry-src/items")
+async function writeJson(filePath: string, data: unknown): Promise<void> {
+  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8")
+}
+
+/**
+ * Recursively delete a directory if it exists.
+ * No-op on ENOENT.
+ */
+async function rmDirIfExists(dirPath: string): Promise<void> {
+  try {
+    await rm(dirPath, { recursive: true, force: true })
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      return
+    }
+    throw error
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cross-style validation
+// ---------------------------------------------------------------------------
+
+type StyleBundle = {
+  style: string
+  manifests: Manifest[]
+  items: RegistryItem[]
+}
+
+function logCrossStyleWarnings(bundles: StyleBundle[]): void {
+  if (bundles.length < 2) return
+
+  const itemsByStyle = new Map<string, Set<string>>()
+  for (const bundle of bundles) {
+    itemsByStyle.set(
+      bundle.style,
+      new Set(bundle.manifests.map((m) => m.name)),
+    )
   }
 
-  const manifests: Manifest[] = []
-  const seenNames = new Set<string>()
+  const allItems = new Set<string>()
+  for (const set of itemsByStyle.values()) {
+    for (const name of set) allItems.add(name)
+  }
 
-  for (const fileName of manifestFiles) {
-    const manifestPath = path.join(MANIFESTS_DIR, fileName)
-    const manifest = await loadManifest(manifestPath)
-    const expectedName = fileName.replace(/\.manifest\.json$/, "")
-
-    if (manifest.name !== expectedName) {
-      throw new Error(
-        `Manifest name must match filename: expected ${expectedName}, got ${manifest.name}`,
+  for (const item of [...allItems].sort()) {
+    const missingIn: string[] = []
+    for (const [style, items] of itemsByStyle) {
+      if (!items.has(item)) missingIn.push(style)
+    }
+    if (missingIn.length > 0) {
+      console.warn(
+        `[cross-style] item "${item}" missing in style(s): ${missingIn.join(", ")}`,
       )
     }
-
-    if (seenNames.has(manifest.name)) {
-      throw new Error(`Duplicate manifest name detected: ${manifest.name}`)
-    }
-
-    seenNames.add(manifest.name)
-    manifests.push(manifest)
   }
+}
 
-  manifests.sort((a, b) => a.name.localeCompare(b.name))
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+async function main() {
+  const styles = await discoverStyles()
+  if (styles.length === 0) {
+    throw new Error(`No styles found under ${STYLES_DIR}`)
+  }
 
   const registryItemSchema =
     await readJsonFile<Record<string, unknown>>(ITEM_SCHEMA_PATH)
@@ -520,7 +763,6 @@ async function main() {
     $id: "https://json-schema.org/draft-07/schema#",
     $schema: "https://json-schema.org/draft-07/schema#",
   }
-
   ajv.addMetaSchema(draft07Meta)
   ajv.addSchema(
     registryItemSchema,
@@ -530,40 +772,108 @@ async function main() {
   const validateItem = ajv.compile(registryItemSchema)
   const validateRegistry = ajv.compile(registrySchema)
 
-  const registryItems: RegistryItem[] = []
-
-  for (const manifest of manifests) {
-    const item = await buildRegistryItem(manifest)
-    const isValid = validateItem(item)
-    assertValid(isValid, validateItem.errors, `item ${manifest.name}`)
-    registryItems.push(item)
-  }
-
-  const registryIndex: RegistryIndex = {
-    name: REGISTRY_NAME,
-    homepage: REGISTRY_HOMEPAGE,
-    items: manifests.map((manifest) => buildItemBase(manifest)),
-  }
-
-  const registryIsValid = validateRegistry(registryIndex)
-  assertValid(registryIsValid, validateRegistry.errors, "registry index")
-
-  await mkdir(OUTPUT_ITEMS_DIR, { recursive: true })
-  await mkdir(OUTPUT_VERSION_ITEMS_DIR, { recursive: true })
+  // Wipe the entire output tree so deletes propagate cleanly.
+  await rmDirIfExists(OUTPUT_DIR)
   await mkdir(OUTPUT_VERSION_DIR, { recursive: true })
 
-  await clearJsonOutputs(OUTPUT_ITEMS_DIR)
-  await clearJsonOutputs(OUTPUT_VERSION_ITEMS_DIR)
+  const bundles: StyleBundle[] = []
 
-  await Promise.all(
-    registryItems.flatMap((item) => [
-      writeJson(path.join(OUTPUT_ITEMS_DIR, `${item.name}.json`), item),
-      writeJson(path.join(OUTPUT_VERSION_ITEMS_DIR, `${item.name}.json`), item),
-    ]),
-  )
+  for (const style of styles) {
+    const styleDir = path.join(STYLES_DIR, style)
+    const itemsDir = path.join(styleDir, "items")
+    const manifestFiles = await discoverManifestFiles(itemsDir)
 
-  await writeJson(path.join(OUTPUT_DIR, "registry.json"), registryIndex)
-  await writeJson(path.join(OUTPUT_VERSION_DIR, "registry.json"), registryIndex)
+    if (manifestFiles.length === 0) {
+      // Skeleton style with no items — skip emission entirely.
+      continue
+    }
+
+    const manifests: Manifest[] = []
+    const seenNames = new Set<string>()
+
+    for (const fileName of manifestFiles) {
+      const manifestPath = path.join(itemsDir, fileName)
+      const manifest = await loadManifest(manifestPath)
+      const expectedName = fileName.replace(/\.manifest\.json$/, "")
+
+      if (manifest.name !== expectedName) {
+        throw new Error(
+          `[${style}] manifest name must match filename: expected ${expectedName}, got ${manifest.name}`,
+        )
+      }
+      if (seenNames.has(manifest.name)) {
+        throw new Error(`[${style}] duplicate manifest name: ${manifest.name}`)
+      }
+
+      seenNames.add(manifest.name)
+      manifests.push(manifest)
+    }
+
+    manifests.sort((a, b) => a.name.localeCompare(b.name))
+
+    const items: RegistryItem[] = []
+    for (const manifest of manifests) {
+      const item = await buildRegistryItem(manifest, styleDir)
+      const isValid = validateItem(item)
+      assertValid(
+        isValid,
+        validateItem.errors,
+        `[${style}] item ${manifest.name}`,
+      )
+      items.push(item)
+    }
+
+    const styleIndex: RegistryIndex = {
+      name: `${REGISTRY_NAME}/${style}`,
+      homepage: REGISTRY_HOMEPAGE,
+      items: manifests.map((manifest) => buildItemBase(manifest)),
+    }
+
+    const styleIndexValid = validateRegistry(styleIndex)
+    assertValid(
+      styleIndexValid,
+      validateRegistry.errors,
+      `[${style}] registry index`,
+    )
+
+    const styleOutputDir = path.join(OUTPUT_STYLES_DIR, style)
+    const styleItemsOutputDir = path.join(styleOutputDir, "r")
+
+    await mkdir(styleItemsOutputDir, { recursive: true })
+
+    await Promise.all(
+      items.map((item) =>
+        writeJson(path.join(styleItemsOutputDir, `${item.name}.json`), item),
+      ),
+    )
+
+    await writeJson(path.join(styleOutputDir, "registry.json"), styleIndex)
+
+    bundles.push({ style, manifests, items })
+  }
+
+  if (bundles.length === 0) {
+    throw new Error(
+      "No styles produced any output. Each style must have at least one manifest in its items/ directory.",
+    )
+  }
+
+  // Top-level index — lists styles with their item counts and links.
+  const topLevelIndex: TopLevelIndex = {
+    name: REGISTRY_NAME,
+    homepage: REGISTRY_HOMEPAGE,
+    baseUrl: REGISTRY_BASE_URL,
+    version: REGISTRY_VERSION,
+    styles: bundles.map((bundle) => ({
+      name: bundle.style,
+      itemCount: bundle.items.length,
+      registryUrl: `${REGISTRY_BASE_URL}/${REGISTRY_VERSION}/styles/${bundle.style}/registry.json`,
+    })),
+  }
+
+  await writeJson(path.join(OUTPUT_VERSION_DIR, "registry.json"), topLevelIndex)
+
+  logCrossStyleWarnings(bundles)
 }
 
 main().catch((error) => {

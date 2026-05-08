@@ -1,0 +1,726 @@
+{
+  "name": "leshi-ui/unistyles",
+  "homepage": "https://github.com/AgustinOberg/leshiui",
+  "items": [
+    {
+      "name": "a11y",
+      "type": "registry:lib",
+      "title": "A11y Utilities",
+      "description": "Accessibility utilities for mapping aria attributes and roles."
+    },
+    {
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "description": "A vertically stacked set of interactive headings that expand or collapse to reveal content.",
+      "registryDependencies": [
+        "@leshi-ui/collapsible",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "alert",
+      "type": "registry:ui",
+      "title": "Alert",
+      "description": "Alert container with title and description subcomponents.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert Dialog",
+      "description": "A modal dialog that requires an explicit action to close.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/overlay",
+        "@leshi-ui/focus",
+        "@leshi-ui/scroll-lock",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "aspect-ratio",
+      "type": "registry:ui",
+      "title": "Aspect Ratio",
+      "description": "Maintains aspect ratio of children content. Uses CSS aspect-ratio on web, layout measurement on native.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "description": "Avatar with image loading states and fallback initials.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "Badge component with default, secondary, destructive, and outline variants.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "breadcrumb",
+      "type": "registry:ui",
+      "title": "Breadcrumb",
+      "description": "Presentational breadcrumb navigation component. Uses Pressable with role=link and aria-current. Consumer must handle navigation via onItemPress.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "Button component with variants and pressed/disabled/loading states.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "button-group",
+      "type": "registry:ui",
+      "title": "Button Group",
+      "description": "Groups related buttons together with automatic border radius handling and optional separators. Supports horizontal/vertical orientation.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "Month grid calendar with keyboard navigation and date selection.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "Card container and subcomponents.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "carousel",
+      "type": "registry:ui",
+      "title": "Carousel",
+      "description": "Swipeable carousel with snapping and keyboard navigation on web.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "chart",
+      "type": "registry:ui",
+      "title": "Chart",
+      "description": "SVG-based chart component for simple line, area, and bar charts.",
+      "dependencies": [
+        "react-native-svg"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "description": "A checkbox input with support for controlled/uncontrolled state, indeterminate state, and web accessibility.",
+      "dependencies": [
+        "lucide-react-native"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "description": "An interactive component which expands/collapses content with animated height transitions. Single-item accordion pattern.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "description": "Provides a searchable list of options in an input-driven overlay.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/focus",
+        "@leshi-ui/overlay",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "command",
+      "type": "registry:ui",
+      "title": "Command",
+      "description": "Command palette with input filtering and keyboard navigation.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "context-menu",
+      "type": "registry:ui",
+      "title": "Context Menu",
+      "description": "Displays a context menu on right click or long press.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/focus",
+        "@leshi-ui/overlay",
+        "@leshi-ui/roving-focus",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:ui",
+      "title": "Data Table",
+      "description": "Tabular data display with sorting and basic row interactions.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "date-picker",
+      "type": "registry:ui",
+      "title": "Date Picker",
+      "description": "Input-style trigger with a calendar popover for selecting dates.",
+      "registryDependencies": [
+        "@leshi-ui/calendar",
+        "@leshi-ui/popover"
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "description": "A modal dialog that traps focus on web and locks scroll while open.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/overlay",
+        "@leshi-ui/focus",
+        "@leshi-ui/scroll-lock",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "description": "A modal drawer that slides in from the edge of the screen.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/overlay",
+        "@leshi-ui/focus",
+        "@leshi-ui/scroll-lock",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "description": "Displays a list of actions or options in a menu.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/focus",
+        "@leshi-ui/overlay",
+        "@leshi-ui/roving-focus",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "empty",
+      "type": "registry:ui",
+      "title": "Empty",
+      "description": "Empty state component with icon, title, description, and action slots for displaying placeholder content in lists and views.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "description": "High-level presentational field wrapper combining label, control, description, and error messages. Built on Form Core components.",
+      "registryDependencies": [
+        "@leshi-ui/form-core"
+      ]
+    },
+    {
+      "name": "focus",
+      "type": "registry:lib",
+      "title": "Focus",
+      "description": "Focus primitive for trapping and restoring focus."
+    },
+    {
+      "name": "form-core",
+      "type": "registry:ui",
+      "title": "Form Core",
+      "description": "Presentational form components for consistent layout, labels, descriptions, and error display. No form state management. Use with form libraries.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "form-rhf",
+      "type": "registry:ui",
+      "title": "Form RHF",
+      "description": "React Hook Form integration helpers with typed wrappers. Provides FormRHFProvider and FormRHFField for seamless form handling.",
+      "dependencies": [
+        "react-hook-form"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/field"
+      ]
+    },
+    {
+      "name": "form-tsf",
+      "type": "registry:ui",
+      "title": "Form TSF",
+      "description": "TanStack Form integration helpers. Provides wrappers for @tanstack/react-form.",
+      "dependencies": [
+        "@tanstack/react-form"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/field"
+      ]
+    },
+    {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "description": "Displays rich content when a trigger is hovered or focused.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/overlay",
+        "@leshi-ui/positioning"
+      ]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "dependencies": [
+        "react-native-unistyles@^3.2.0",
+        "react-native-nitro-modules@^0.35.2"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "description": "Composable input group with text addons, icons, and button attachments. Layout wrapper for enhancing inputs.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "input-otp",
+      "type": "registry:ui",
+      "title": "Input OTP",
+      "description": "One-time password input with auto-complete, paste support, and separator patterns",
+      "dependencies": [
+        "react-native-unistyles@^3.2.0",
+        "react-native-nitro-modules@^0.35.2"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "item",
+      "type": "registry:ui",
+      "title": "Item",
+      "description": "Generic item container with spacing variants. FormItem-like wrapper for vertically stacked items in forms or lists.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "description": "Keyboard shortcut display component with monospace styling. Supports modifier key symbols and multiple sizes.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "label",
+      "type": "registry:ui",
+      "title": "Label",
+      "description": "Form label component with disabled state styling. Note: React Native does not support htmlFor or click-to-focus behavior.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "menubar",
+      "type": "registry:ui",
+      "title": "Menubar",
+      "description": "Horizontal menu bar with keyboard navigation and dropdown menus.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/overlay",
+        "@leshi-ui/roving-focus",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "native-select",
+      "type": "registry:ui",
+      "title": "Native Select",
+      "description": "Native picker component using platform-specific select UI. iOS: bottom sheet, Android: dropdown/dialog, Web: HTML select.",
+      "dependencies": [
+        "@react-native-picker/picker"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "description": "Web-first navigation menu with trigger/content panels and keyboard support.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/overlay",
+        "@leshi-ui/roving-focus",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "overlay",
+      "type": "registry:lib",
+      "title": "Overlay",
+      "description": "Dismiss layer and scrim/backdrop primitive for overlays.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "description": "Pagination component for navigating through pages of data. Presentational component that requires consumer to wire to data source/router.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "description": "Displays rich content in a portal, triggered by a button.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/focus",
+        "@leshi-ui/overlay"
+      ]
+    },
+    {
+      "name": "portal",
+      "type": "registry:lib",
+      "title": "Portal",
+      "description": "Portal provider and host primitives for overlays.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "positioning",
+      "type": "registry:lib",
+      "title": "Positioning",
+      "description": "Positioning primitive for floating content with anchor measurement, placement, and collision handling."
+    },
+    {
+      "name": "press",
+      "type": "registry:lib",
+      "title": "Press Utilities",
+      "description": "Utilities for handling press interactions and event composition."
+    },
+    {
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "description": "Progress bar with determinate and indeterminate modes.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "Radio Group",
+      "description": "A set of checkable buttons—known as radio buttons—where no more than one of the buttons can be checked at a time.",
+      "dependencies": [
+        "lucide-react-native"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "description": "Resizable panel group with draggable handles and web keyboard support.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "roving-focus",
+      "type": "registry:lib",
+      "title": "Roving Focus",
+      "description": "Roving Focus primitive for managing focus in a list or grid."
+    },
+    {
+      "name": "scroll-area",
+      "type": "registry:ui",
+      "title": "Scroll Area",
+      "description": "A styled ScrollView wrapper. On web, scrollbars can be styled with CSS. On native, uses platform defaults.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "scroll-lock",
+      "type": "registry:lib",
+      "title": "Scroll Lock",
+      "description": "Scroll Lock primitive for preventing body scroll on web."
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "description": "Displays a list of options for a single selection.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning",
+        "@leshi-ui/focus",
+        "@leshi-ui/overlay",
+        "@leshi-ui/roving-focus",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "Horizontal or vertical separator line.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "sheet",
+      "type": "registry:ui",
+      "title": "Sheet",
+      "description": "A dialog variant that slides in from the edge of the screen.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/overlay",
+        "@leshi-ui/focus",
+        "@leshi-ui/scroll-lock",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "description": "Composable sidebar layout with responsive collapse and menu building blocks.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/press"
+      ]
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "Loading skeleton with optional shimmer animation.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "description": "A slider component for selecting values from a range with single/multi-thumb support, step values, full keyboard navigation on web, and theme-based styling.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "sonner",
+      "type": "registry:ui",
+      "title": "Sonner",
+      "description": "An opinionated toast component for React Native.",
+      "dependencies": [
+        "lucide-react-native",
+        "react-native-unistyles@^3.2.0",
+        "react-native-nitro-modules@^0.35.2"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal"
+      ]
+    },
+    {
+      "name": "spinner",
+      "type": "registry:ui",
+      "title": "Spinner",
+      "description": "Activity indicator wrapper.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "description": "A toggle switch with animated knob transition, controlled/uncontrolled state support, and web accessibility.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "Table component with subcomponents. Web: semantic HTML tables. Native: View-based approximation with limitations.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "A set of sections of content—known as tab panels—that are displayed one at a time.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/roving-focus"
+      ]
+    },
+    {
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "Textarea",
+      "description": "Multiline text input with Unistyles variants.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:ui",
+      "title": "Toast",
+      "description": "A succinct message that is displayed temporarily.",
+      "dependencies": [
+        "lucide-react-native"
+      ],
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal"
+      ]
+    },
+    {
+      "name": "toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "description": "A two-state button that can be toggled on or off with support for controlled/uncontrolled state and aria-pressed on web.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    },
+    {
+      "name": "toggle-group",
+      "type": "registry:ui",
+      "title": "Toggle Group",
+      "description": "A set of two-state buttons that can be toggled on or off.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/roving-focus",
+        "@leshi-ui/toggle"
+      ]
+    },
+    {
+      "name": "tokens",
+      "type": "registry:lib",
+      "title": "Tokens",
+      "description": "Semantic tokens (shared core) and Unistyles theme configuration.",
+      "dependencies": [
+        "react-native-unistyles@^3.2.0",
+        "react-native-nitro-modules@^0.35.2"
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "description": "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+      "registryDependencies": [
+        "@leshi-ui/tokens",
+        "@leshi-ui/portal",
+        "@leshi-ui/positioning"
+      ]
+    },
+    {
+      "name": "typography",
+      "type": "registry:ui",
+      "title": "Typography",
+      "description": "Typography presets with Unistyles variants.",
+      "registryDependencies": [
+        "@leshi-ui/tokens"
+      ]
+    }
+  ]
+}

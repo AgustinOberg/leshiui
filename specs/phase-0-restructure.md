@@ -532,17 +532,17 @@ For clarity — these are next, but not now:
 | # | Step | Status | Commit |
 |---|---|---|---|
 | 0 | Pre-Phase-0 docs cleanup (deletions, LICENSE, package.json rename, partial doc updates) | done | `8d7e7e0` |
-| 1 | Branding constants in build script (`REGISTRY_NAME`, `REGISTRY_BASE_URL`, `REGISTRY_HOMEPAGE`) | pending | — |
+| 1 | Branding constants in build script (`REGISTRY_NAME`, `REGISTRY_BASE_URL`, `REGISTRY_HOMEPAGE`) | done | next commit |
 | 2 | LICENSE | done | `8d7e7e0` |
 | 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | done | next commit |
 | 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | done | next commit |
 | 5 | Move Unistyles tree (`shadniwind/{lib,ui,primitives}` → `styles/unistyles/{lib,ui,primitives}`) | done | next commit |
 | 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | done | next commit |
 | 7 | Update primitive/UI imports — none required; sibling imports survive the move (verified) | done | n/a |
-| 8 | Migrate manifests to `registry-src/styles/unistyles/items/`; apply kebab-case to `path`; tokens manifest swaps to new shape | pending | — |
-| 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | pending | — |
+| 8 | Migrate manifests to `registry-src/styles/unistyles/items/`; apply kebab-case to `path`; tokens manifest swaps to new shape | done | next commit |
+| 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | done | next commit |
 | 10 | Update tests imports (`registry-src/shadniwind/...` → new paths) | done | next commit |
-| 11 | Regenerate `public/` (delete old, rebuild, verify reproducibility) | pending | — |
+| 11 | Regenerate `public/` (delete old, rebuild, verify reproducibility) | done | next commit |
 | 12 | Run full check suite (`lint`, `typecheck`, `test`, `build:registry`, clean tree) | pending | — |
 | 13 | CI workflow — remove `deploy` job, drop `pages` permissions | pending | — |
 | 14 | Doc rewrites (`SPEC.md`, `README.md`, polish `CLAUDE.md`, polish `AGENTS.md`) | pending | — |

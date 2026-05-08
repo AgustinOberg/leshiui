@@ -2,15 +2,20 @@
   "name": "tokens",
   "type": "registry:lib",
   "title": "Tokens",
-  "description": "Semantic tokens and Unistyles theme configuration.",
+  "description": "Semantic tokens (shared core) and Unistyles theme configuration.",
   "dependencies": [
     "react-native-unistyles@^3.2.0",
     "react-native-nitro-modules@^0.35.2"
   ],
   "files": [
     {
-      "source": "lib/tokens.ts",
-      "path": "lib/tokens.ts",
+      "source": "core:tokens/types.ts",
+      "path": "lib/tokens/types.ts",
+      "type": "registry:lib"
+    },
+    {
+      "source": "core:tokens/default.ts",
+      "path": "lib/tokens/default.ts",
       "type": "registry:lib"
     },
     {
