@@ -1,419 +1,101 @@
-# SPEC: Leshi UI
+# SPEC — Leshi UI
 
-shadcn-style *source-distributed* UI components for React Native (iOS/Android) + React Native Web, with an internal PortalHost overlay foundation (Option A) and **two interchangeable styling backends** (Unistyles + plain StyleSheet).
+High-level project specification. Active execution plans live in `specs/`; this document captures the durable mission, principles, and architecture.
 
-> **Fork status:** Leshi UI is a fork of [shadniwind](https://github.com/deicod/shadniwind). Most of this spec was inherited from shadniwind and remains valid for the **Unistyles flavor**. References to `shadniwind` (item names, paths, registry URLs) throughout this document are legacy and will be migrated as part of the rebrand. The dual-backend work described in §0.1 is the defining new requirement.
+## Mission
 
-This document is intended to be handed to an implementation agent to derive milestones/tasks.
+A shadcn-style, source-distributed UI component library for React Native (iOS / Android / Web) with **interchangeable styling backends**. The consumer picks one styling backend per project; component APIs and behavior are identical across backends. The library publishes a static shadcn registry — components install via `npx shadcn@latest add @leshi-ui/<item>` and live as editable source in the consumer's project.
 
----
+## Goals
 
-## 0. Executive summary
-Leshi UI is a **static registry** of installable "items" (tokens, primitives, components) that are **copied as source files** into a consumer app (the shadcn/ui distribution model). Each installed component is editable in-app.
+1. **shadcn API parity.** Component shapes (props, slot composition, naming, file layout) mirror shadcn/ui. A developer fluent in shadcn web should feel at home in Leshi UI's RN catalog.
+2. **Backend-swappable styling.** Today: Unistyles flavor (high-perf, native deps). Soon: StyleSheet flavor (zero native deps, broader compatibility). Architecture must support a third or fourth backend without touching the build pipeline.
+3. **Minimal dependencies.** Each registry item ships with the smallest surface that still works. The user owns and edits the installed code.
+4. **Performance and accessibility.** Avoid unnecessary re-renders, lean on platform primitives, set proper `accessibilityRole` / aria, keyboard support on web, screen reader support on native.
 
-## 0.1 Project direction: dual styling backends
+## Non-goals
 
-Leshi UI ships two parallel styling backends. A consumer picks **one** per project; they do not coexist.
+- Pixel-perfect parity with shadcn/ui's web visual design (RN constraints make some choices different; what matters is API parity).
+- Expo Go support (Unistyles flavor has native deps that block it; StyleSheet flavor will not have this restriction).
+- A custom CLI. Consumers use `npx shadcn@latest` directly with a custom registry namespace.
+- Reinventing what shadcn already documents well — when in doubt, defer to shadcn's conventions.
 
-1. **Unistyles flavor** — the existing implementation. Uses `react-native-unistyles` v3 with its native dependencies (nitro-modules, edge-to-edge, RN 0.78+ New Architecture, Expo SDK 53+). Best performance, theme runtime, web pseudo-states.
-2. **StyleSheet flavor** — to be added. Uses plain React Native `StyleSheet` with a Context-based theme provider. Zero native dependencies; works in any RN setup, including projects that can't or won't take Unistyles.
+## Architecture
 
-Both flavors share a **flavor-agnostic core**: component composition, prop API, hooks, a11y wiring, keyboard handlers, variants logic. The styling layer is the only thing that differs. The model intentionally mirrors shadcn's Radix-vs-BaseUI swap: same recipe, different primitive layer.
+### Source layout
 
-### Open architectural questions (not yet decided)
+```
+registry-src/
+├── core/                           # flavor-agnostic source
+│   ├── primitives/                 # pure-logic primitives (extraction pending Phase 1+)
+│   ├── tokens/                     # Theme contract + default light/dark values (HSL)
+│   ├── variants/                   # cva-like helper (Phase 1+)
+│   └── web-ui/                     # `useWebUi` for hover / focus / active on RN Web (Phase 1+)
+└── styles/
+    ├── unistyles/                  # Unistyles flavor (current)
+    │   ├── lib/                    # unistyles.ts wiring + module augmentation
+    │   ├── primitives/             # styled primitives — portal, overlay, focus, etc.
+    │   ├── ui/                     # public catalog (button, dialog, card, ...)
+    │   └── items/                  # per-item manifests
+    └── stylesheet/                 # StyleSheet flavor (skeleton; Phase 1)
+        └── …
+```
 
-The following are direction, not decisions. Implementation agents must confirm with the project owner before committing to one option:
+A new styling backend is one new subfolder under `styles/<x>/` plus its own `items/` manifests. The build script discovers it dynamically.
 
-- **Source layout** — likely `registry-src/core/` (flavor-agnostic) + `registry-src/unistyles/` + `registry-src/stylesheet/` as parallel trees, with manifests fanning out into two separate registry outputs.
-- **Registry naming** — likely `@leshi-ui/unistyles` and `@leshi-ui/stylesheet` published as two registries built from one repo.
-- **Hosting** — public URL TBD; legacy `deicod.github.io/shadniwind` references remain in the build script and generated `public/` until decided.
-- **Theming for the StyleSheet flavor** — likely Context + `useTheme()` + a small dependency-free variant helper. No external dep (no CVA) unless explicitly approved.
-- **Token sharing** — TBD whether tokens are a single shared module both flavors consume, or each flavor has its own with the same shape.
-- **Migration scope** — TBD whether to port the full ~60-component catalog to the StyleSheet flavor up-front or start with Tier 1 (Appendix B) and grow.
+### Three install layers
 
-## 0.2 Coding philosophy (binding)
+Within any flavor, components fall into three layers that mirror the install order in a consumer app:
 
-Every component, primitive, and helper in Leshi UI must follow these rules. They are part of the spec, not just a style guide:
+1. **Tokens & theme** — installed first. The consumer must import the flavor's wiring file at startup before any styled code runs.
+2. **Primitives** — cross-platform building blocks (portal, overlay, positioning, focus, roving-focus, scroll-lock, press, a11y). Most components depend on at least one. Platform splits use `.web.tsx` / `.native.tsx`; shared types in `*.types.ts`.
+3. **UI components** — the public catalog. Each is a single-file shadcn-style `.tsx` with composition + variants + types + exports in one place.
 
-1. **Mirror shadcn first.** Before writing or changing a component, look at the shadcn/ui equivalent and port its API to React Native. Match props, slot / composition patterns, file shape, and naming. Don't invent a new API when shadcn already defines one. Document any platform deviation in TSDoc.
-2. **Minimal dependencies.** No npm dependencies beyond Unistyles (Unistyles flavor only) and React/RN peer deps without explicit approval. Reimplement small helpers in-tree.
-3. **Single-file components.** Self-contained `.tsx` per public component: composition + variants + types + exports in one file. Split into hooks or sub-components only when genuinely unreadable. Cross-component logic goes in the primitives (or future core) layer.
+### Registry distribution
+
+- Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy from `public/`).
+- URL pattern: `<base>/v1/styles/{style}/r/{name}.json` — shadcn CLI substitutes both placeholders.
+- Top-level index: `<base>/v1/registry.json` lists styles + per-style item counts and registry URLs.
+- Per-style index: `<base>/v1/styles/{style}/registry.json`.
+- See `specs/registry-protocol.md` for manifest format, build pipeline behavior, validation rules, and cross-style invariants.
+
+## Coding philosophy (binding)
+
+These principles apply to every change. They are project-defining, not stylistic preferences.
+
+1. **Mirror shadcn first.** Look at how shadcn implements a component and port that shape to RN. Don't invent new APIs when shadcn already defines one. Document any platform deviation in TSDoc.
+2. **Minimal dependencies.** No npm dependencies beyond Unistyles (Unistyles flavor only) and React/RN peer deps without explicit user approval. Reimplement small helpers in-tree. Optional integration items (e.g. `form-rhf`, `form-tsf`) carry their own deps and are opt-in.
+3. **Single-file components by default.** Like shadcn, a component file is self-contained: composition + variants + types + exports in one `.tsx`. Split into hooks or sub-components only when the file becomes genuinely hard to read. Cross-component logic goes in `primitives/` (or future `core/primitives/`).
 4. **Strict typing.** No `any`. Mirror shadcn's TS surface where applicable.
-5. **Performance and a11y are non-negotiable.** Correct `accessibilityRole`, aria mapping on web, keyboard support on web, screen reader support on native, no avoidable re-renders.
-6. **Reuse via primitives.** The existing primitives set (portal, overlay, positioning, focus, roving-focus, scroll-lock, press, a11y) is the reuse model. New cross-component logic belongs there.
+5. **Performance and accessibility are non-negotiable.** Avoid unnecessary re-renders, lean on platform primitives, set correct `accessibilityRole` / aria, keyboard support on web, screen reader support on native.
+6. **Reuse via primitives.** New cross-component logic belongs in the primitive layer, not duplicated.
 
-Target platforms from day 1:
-- iOS + Android (React Native)
-- Web (react-native-web / Expo Web)
+## Documentation in source
 
-Key constraints from Unistyles v3:
-- Requires **New Architecture** and **React Native 0.78+**
-- Expo requires **SDK 53+**
-- Requires **react-native-nitro-modules** and **react-native-edge-to-edge**
-- **Not supported on Expo Go**
-- Not supported on old architecture (Fabric-only) :contentReference[oaicite:0]{index=0}
+Documentation is a first-class concern. Since components are source-distributed, in-source docs land in the consumer's editor as hover tooltips.
 
----
+- **TSDoc on all exports.** Every exported type, interface, function, hook, and component carries `/** ... */`.
+- **Why, not what.** Explain purpose, recommended placement, lifecycle behaviors, platform caveats. Don't repeat what well-named identifiers already say.
+- **Examples.** Components and complex hooks include `@example` blocks.
+- **Magic numbers & non-obvious logic.** Inline comments explain rationale.
+- **Edge cases.** Note known platform limitations explicitly (e.g., "Web only", "Native fallback uses long-press").
 
-## 1. Goals
-1) Provide a reusable UI system for new projects without Tailwind-className dependencies (Uniwind/NativeWind not required).
-2) Unistyles-first styling:
-   - themes + semantic tokens
-   - variants/compound variants for component variants (variant/size/state)
-   - web pseudo-states where applicable (hover/focus-visible) using Unistyles web facilities
-3) Source distribution through a registry:
-   - install = copy files + add npm deps
-   - upgrade = reinstall items, review diffs
-4) Cross-platform behavior:
-   - consistent APIs across iOS/Android/Web
-   - explicit caveats where parity is not feasible
-5) Overlay foundation shipped early (PortalHost) to enable Dialog/Popover/Tooltip/Toast/Menu components.
+## Tiering and component catalog
 
----
+Components are tiered by complexity, from Tier 1 (simple presentational) to Tier 4 (big feature components like Calendar, Data Table). Tier 1 ships first in any new flavor — it's the minimum viable catalog. The full mapping with required primitives, platform notes, and tiers lives in `specs/component-catalog.md`.
 
-## 2. Non-goals (initial)
-- Pixel-perfect parity with shadcn/ui web implementation.
-- Expo Go support (blocked by native code requirements). :contentReference[oaicite:1]{index=1}
-- Supporting platforms outside iOS/Android/Web.
-- Writing a new CLI (use shadcn registry support).
+## Versioning
 
----
+Path-based: `/v1/...` is the current major version. Breaking changes to URL scheme or manifest format publish to `/v2/...` with `/v1/...` kept alive for a deprecation window. The `REGISTRY_VERSION` constant in `scripts/build-registry.ts` controls the prefix.
 
-## 3. Assumptions / constraints
-### 3.1 Runtime constraints (must be documented prominently)
-- React Native: 0.78+ with New Architecture enabled. :contentReference[oaicite:2]{index=2}
-- Expo: SDK 53+ and dev client / prebuild flow (no Expo Go). :contentReference[oaicite:3]{index=3}
-- Unistyles initialization must happen **before application code creates stylesheets** (i.e., before any `StyleSheet.create` runs). :contentReference[oaicite:4]{index=4}
-- Use Unistyles v3 APIs only (`StyleSheet.create` + `styles.useVariants`); avoid v2 `createStyleSheet`/`useStyles`.
+## Reference docs
 
-### 3.2 Distribution constraints
-- Registry items must be installable into varied app structures.
-- Installed code should not assume Tailwind, CSS variables, Next.js, or DOM-only APIs.
-
----
-
-## 4. Definitions
-- **Registry item**: a JSON document describing files + dependencies to be installed into a consumer project (shadcn registry-item.json schema). :contentReference[oaicite:5]{index=5}
-- **Installed layout**: standard locations in consumer projects:
-  - `lib/*` (tokens, unistyles init, primitives)
-  - `components/ui/*` (UI components)
-- **Tier**: complexity grouping used for roadmap and acceptance criteria.
-
----
-
-## 5. System architecture
-shadniwind consists of 3 layers.
-
-### 5.1 Tokens & theme layer (installed first)
-Provides:
-- semantic tokens (colors/radius/typography/spacing)
-- light/dark theme definitions
-- Unistyles `StyleSheet.configure(...)` module
-- TS module augmentation for Unistyles theme types
-
-Deliverables (installed files):
-- `lib/tokens.ts`
-- `lib/unistyles.ts` (calls `StyleSheet.configure`)
-- `lib/unistyles.d.ts`
-
-Rules:
-- `lib/unistyles.ts` must be imported exactly once at startup, before any other code that calls `StyleSheet.create`. :contentReference[oaicite:6]{index=6}
-
-### 5.2 Primitives layer (cross-platform building blocks)
-Primitives are stable internal APIs used by all advanced components. Platform differences use `.native.ts(x)` and `.web.ts(x)`.
-
-Required primitives (minimum set):
-- `portal` (Option A)
-- `overlay` (dismiss layer, scrim, outside-press detection)
-- `positioning` (anchor measurement + placement + collision handling)
-- `focus` (focus trap/restore on web; minimal/no-op on native)
-- `roving-focus` (keyboard navigation for menus/tabs/listbox on web)
-- `scroll-lock` (web scroll lock; native best-effort)
-- `press` utilities (compose handlers, pressed/disabled patterns)
-- `a11y` utilities (role/aria prop mappings for RN Web)
-
-### 5.3 Components layer
-Public components, generally matching shadcn component names and prop conventions where sensible.
-
-Each component must:
-- use Unistyles `StyleSheet.create((theme) => ...)`
-- define variants for `variant`, `size`, and relevant states (`disabled`, `focused`, `pressed`, `open`, etc.)
-- have explicit platform notes when behavior differs.
-
----
-
-## 6. Registry design & hosting
-### 6.1 Hosting
-- Static hosting via GitHub Pages.
-- Endpoints:
-  - `https://deicod.github.io/shadniwind/registry.json`
-  - `https://deicod.github.io/shadniwind/r/{name}.json`
-
-### 6.2 Registry schema
-Registry items must follow the shadcn registry-item.json schema, including:
-- `files[]` (with `path`, `type`, `content`)
-- `dependencies[]` (npm deps)
-- `registryDependencies[]` (other items to install) :contentReference[oaicite:7]{index=7}
-
-### 6.3 Source-of-truth vs published artifacts
-To avoid maintaining giant embedded JSON by hand:
-
-Source-of-truth (typed TS/TSX files):
-- `registry-src/shadniwind/lib/*`
-- `registry-src/shadniwind/primitives/*`
-- `registry-src/shadniwind/ui/*`
-
-Generated artifacts (published):
-- `public/registry.json`
-- `public/r/*.json`
-
-### 6.4 Registry generator
-Provide `scripts/build-registry.ts` that:
-1) reads item manifests (e.g., `registry-src/items/<name>.manifest.json`)
-2) embeds file contents from `registry-src/shadniwind/**`
-3) outputs `public/r/<name>.json` and updates `public/registry.json`
-
-Validation:
-- Validate generated JSON against schema (Ajv) using a pinned copy of schema (or validate against the official schema URL).
-- CI fails if generation changes git-tracked outputs (dirty tree).
-
----
-
-## 7. Consumer installation contract
-### 7.1 components.json (consumer)
-Consumers configure a registry namespace in `components.json` pointing to your `{name}.json` endpoint.
-
-### 7.2 Required install order
-1) `@shadniwind/tokens` (or `tokens`)
-2) Import `lib/unistyles.ts` once at startup, before other imports that create stylesheets. :contentReference[oaicite:8]{index=8}
-3) `@shadniwind/portal` (or `portal`)
-4) Mount `PortalProvider` + a root `PortalHost` near the app root.
-
-### 7.3 Expo / RN setup notes (must be in README)
-- Unistyles requires RN 0.78+ and New Architecture; Expo SDK 53+; requires nitro-modules + edge-to-edge; not Expo Go. :contentReference[oaicite:9]{index=9}
-
----
-
-## 8. Tokens & theming (spec)
-### 8.1 Semantic token set (minimum)
-Colors:
-- background / foreground
-- card / cardForeground
-- popover / popoverForeground
-- primary / primaryForeground
-- secondary / secondaryForeground
-- muted / mutedForeground
-- accent / accentForeground
-- destructive / destructiveForeground
-- border / input / ring
-
-Radius:
-- sm / md / lg
-
-Typography:
-- font families (sans, mono)
-- sizes (xs/sm/md/lg/xl)
-- line heights
-- weights (normal/medium/semibold/bold)
-
-Spacing:
-- `space(n)` helper (e.g., 4px scale) or explicit scale.
-
-### 8.2 Themes
-- Must include `light` and `dark` theme names to support adaptive theme mode. :contentReference[oaicite:10]{index=10}
-- Adaptive themes enabled by default in configure.
-
----
-
-## 9. Portal primitive (Option A) — specification
-### 9.1 Public API
-- `PortalProvider({ children })`
-- `PortalHost({ name = "root" })`
-- `Portal({ name = "root", children })`
-
-### 9.2 Requirements
-- Multiple hosts by name
-- Multiple mounted nodes per host
-- Updates propagate reliably
-- Dismiss layers handled by higher primitives (overlay), not the portal itself
-- Recommended root host placement: last in root tree, absolutely positioned, pointerEvents “box-none”.
-
----
-
-## 10. Forms strategy (because shadcn lists Form + Field + Item)
-shadcn lists:
-- `Form`
-- `Field`
-- `Item`
-and also separate docs for React Hook Form and TanStack Form. :contentReference[oaicite:11]{index=11}
-
-shadniwind approach:
-- `form-core`: purely presentational wrappers and consistent spacing/label/error display; no dependency on a form library.
-- `form-rhf`: integration helpers and typed wrappers for React Hook Form (optional registry item).
-- `form-tsf`: integration helpers for TanStack Form (optional registry item).
-
----
-
-## 11. Quality and consistency rules (global)
-- TypeScript strict.
-- No DOM-only APIs in shared code; web-only code goes in `.web.ts(x)` or guarded behind platform checks.
-- Prefer relative imports inside installed files (avoid alias dependency).
-- Accessibility:
-  - set appropriate `accessibilityRole`
-  - on web, apply focus-visible ring styles (using Unistyles web pseudo support where available)
-  - keyboard support for menus/listbox-like components on web.
-
-### 11.4 Documentation
-Documentation is a first-class citizen in shadniwind. Since components are source-distributed, the documentation lives within the source files to assist the developer in their editor.
-
-Rules for Registry Items:
-- **TSDoc for Exports**: All exported types, interfaces, and components must have a TSDoc comment (`/** ... */`).
-- **The "Why" vs "What"**: Don't describe what the code does; explain its purpose, recommended placement, lifecycle behaviors, and platform caveats.
-- **Param/Returns**: Use `@param` and `@returns` tags for functions/hooks.
-- **Examples**: Include an `@example` block for complex components or hooks.
-- **Magic Numbers**: Explain the rationale behind magic numbers or complex logic with inline comments.
-- **Edge Cases**: Document known limitations or behavior on specific platforms (e.g., "Web only", "Native only").
-
----
-
-## 12. CI / tooling requirements
-- Node 20+ recommended.
-- Lint + format (Biome or ESLint/Prettier, pick one).
-- Typecheck.
-- Registry build + schema validation.
-- Optional: minimal render tests for Tier 1; unit tests for portal/positioning.
-
----
-
-## 13. Versioning
-- Publish registry paths with versioned roots:
-  - `/v1/registry.json` and `/v1/r/{name}.json`
-- Keep `/r/{name}.json` as “latest stable” pointing to v1 until a breaking v2 is introduced.
-
----
-
-## 14. Milestones (high-level)
-M0: Repo scaffold + registry generator + GitHub Pages
-M1: tokens + unistyles init + portal
-M2: Tier 1 component set complete (see Appendix A)
-M3: Overlay primitives + first overlay components (Tooltip/Popover/Toast)
-M4: Dialog family + Drawer/Sheet
-M5+: Remaining catalog expansion (Select/Combobox/Menus/etc.)
-M6+: Big feature components (Calendar/Date Picker/Data Table/Chart/Carousel)
-
----
-
-## 15. Acceptance criteria (global)
-1) Expo dev-client app (SDK 53+) installs tokens, imports unistyles init early, mounts PortalHost, and renders Tier 1 components.
-2) Bare RN app does the same.
-3) Web build renders Tier 1 components with visible focus indication and correct theming.
-4) Registry artifacts are reproducible and schema-valid; CI fails if out of sync.
-5) Each component item includes minimal docs: props, variants, platform caveats, and example usage.
-
----
-
-# Appendix A: shadcn component catalog mapping (1:1 list)
-Source list: shadcn Components page. :contentReference[oaicite:12]{index=12}
-
-Legend for required primitives:
-- T = tokens/unistyles init
-- P = portal
-- O = overlay (dismiss layer, scrim, outside-press)
-- Pos = positioning (anchor, placement, collision)
-- F = focus (trap/restore; web-first)
-- RF = roving focus (keyboard navigation for menus/listbox)
-- K = keyboard shortcuts (Esc, arrows, Enter, typeahead)
-- G = gestures (drag/pan; native)
-- V = virtualization (large lists/tables)
-- W = web-first / web-only behavior
-
-Tiers:
-- Tier 1: simple, no portal/positioning required
-- Tier 2: portal + basic overlay/positioning
-- Tier 3: complex focus/keyboard/gestures/composition
-- Tier 4: big feature components (data viz, complex widgets)
-
-| Component (shadcn) | shadniwind item | Tier | Required | Platform notes / caveats |
-|---|---:|:---:|---|---|
-| Accordion | accordion | 2 | T, O, K (web), RF (web) | Native: implement as controlled collapsibles; Web: add keyboard semantics. |
-| Alert Dialog | alert-dialog | 3 | T, P, O, F, K | Requires focus trap/restore on web; native uses modal-like behavior. |
-| Alert | alert | 1 | T | Simple presentational container. |
-| Aspect Ratio | aspect-ratio | 1 | T | Web: CSS aspect-ratio; native: layout trick with measured width/height. |
-| Avatar | avatar | 1 | T | Image loading states; fallback initials. |
-| Badge | badge | 1 | T | Pure presentational. |
-| Breadcrumb | breadcrumb | 2 | T, K (web) | Web: links + aria-current; native: navigation integration left to consumer. |
-| Button Group | button-group | 2 | T | Implement grouping + separators + consistent radii; optional roving focus on web. |
-| Button | button | 1 | T | Pressed/disabled/loading variants; web focus-visible ring. |
-| Calendar | calendar | 4 | T, K, RF | Web: rich keyboard nav; native: must decide grid implementation and locale formatting. |
-| Card | card | 1 | T | Pure presentational. |
-| Carousel | carousel | 4 | T, G, K (web) | Native gestures; web arrow keys; snapping; accessibility varies. |
-| Chart | chart | 4 | T | Choose charting strategy (SVG-based cross-platform recommended); document limitations. |
-| Checkbox | checkbox | 2 | T, K (web) | Native: Pressable + icon; Web: role/aria-checked + space toggle. |
-| Collapsible | collapsible | 2 | T, K (web) | Similar to accordion but single-item. |
-| Combobox | combobox | 3 | T, P, O, Pos, RF, K, F (web) | Hard: typeahead, listbox semantics, IME; native vs web differences must be documented. |
-| Command | command | 3 | T, P, O, RF, K | Command palette pattern; web keyboard-first; native fallback acceptable. |
-| Context Menu | context-menu | 3 | T, P, O, Pos, RF, K (web) | Web: right-click + keyboard; native: long-press trigger. |
-| Data Table | data-table | 4 | T, V, K (web) | Likely web-first features; native table is “list”/“grid” approximation; document scope. |
-| Date Picker | date-picker | 4 | T, P, O, Pos, K, RF | Native: may use platform picker or custom; web: calendar + input. |
-| Dialog | dialog | 3 | T, P, O, F, K | Focus trap/restore on web; scroll lock. |
-| Drawer | drawer | 3 | T, P, O, G, K (web) | Native pan gestures; web: slide-in + focus management. |
-| Dropdown Menu | dropdown-menu | 3 | T, P, O, Pos, RF, K | Web semantics matter; native: press trigger. |
-| Empty | empty | 1 | T | Empty-state component; content slots. |
-| Field | field | 2 | T | Part of forms system; presentational wrapper (label/help/error). |
-| Form | form-core (+ form-rhf / form-tsf) | 3 | T, K (web) | Core is presentational; integrations are optional items. |
-| Hover Card | hover-card | 3 | T, P, O, Pos, K (web) | Web-first (hover/focus). Native fallback: press-and-hold or omit hover semantics. |
-| Input Group | input-group | 2 | T | Addons, icons, button attachments; composition focus. |
-| Input OTP | input-otp | 3 | T, K, F (web) | OTP UX differs by platform; must handle paste, autofill hints, numeric keyboard. |
-| Input | input | 1 | T | Focus/disabled variants; web focus ring. |
-| Item | item | 2 | T | Shadcn “FormItem”-like wrapper; part of form-core. |
-| Kbd | kbd | 1 | T | Web-first; on native render as pill text. |
-| Label | label | 2 | T | Web: label-for semantics not identical in RN; document recommended usage. |
-| Menubar | menubar | 3 | T, P, O, RF, K, F (web) | Web-first (arrow navigation). Native may be limited and/or not shipped initially. |
-| Native Select | native-select | 2 | T | Web: `<select>` style equivalent; native: platform picker. |
-| Navigation Menu | navigation-menu | 4 | T, P, O, Pos, RF, K, F (web) | Web-first mega-menu behavior; native navigation is usually different—document as web-focused. |
-| Pagination | pagination | 2 | T, K (web) | Provide headless + UI; consumer wires to data source/router. |
-| Popover | popover | 3 | T, P, O, Pos, F (web), K | Core overlay primitive; anchor measurement and collision handling required. |
-| Progress | progress | 1 | T | Determinate/indeterminate. |
-| Radio Group | radio-group | 3 | T, RF, K (web) | Web: roving tab index; native: simple selection list. |
-| Resizable | resizable | 4 | T, W | Web-first; native support likely “not supported” or very limited. |
-| Scroll Area | scroll-area | 2 | T | Native uses ScrollView; web adds styled scrollbars optionally; document differences. |
-| Select | select | 3 | T, P, O, Pos, RF, K, F (web) | Similar complexity to combobox; typeahead on web; native uses overlay list. |
-| Separator | separator | 1 | T | Horizontal/vertical. |
-| Sheet | sheet | 3 | T, P, O, F (web), K | A dialog variant; often right/left/bottom; can share with drawer. |
-| Sidebar | sidebar | 4 | T, K (web) | Often layout + responsive behavior; provide building blocks rather than monolith. |
-| Skeleton | skeleton | 1 | T | Animated shimmer optional; keep dependency-free if possible. |
-| Slider | slider | 3 | T, G, K (web) | Native: gesture-driven; web: arrow keys and aria-valuenow semantics. |
-| Sonner | sonner | 3 | T, P, O, K (web) | Toast system; queue, stacking, dismiss; “Sonner” name kept for parity. |
-| Spinner | spinner | 1 | T | Simple activity indicator wrapper. |
-| Switch | switch | 2 | T, K (web) | Web: role=switch; native: Pressable/animated knob. |
-| Table | table | 2 (web) / 3 (native) | T, V | Web: real table-like rendering; native: list/grid approximation; document limitations. |
-| Tabs | tabs | 3 | T, RF, K (web) | Web semantics; native simpler but keep consistent API. |
-| Textarea | textarea | 1 | T | Wrap multiline TextInput. |
-| Toast | toast | 3 | T, P, O, K (web) | If both Toast and Sonner exist, define Toast as low-level primitive and Sonner as system. |
-| Toggle Group | toggle-group | 3 | T, RF, K (web) | Multi/single selection; roving focus on web. |
-| Toggle | toggle | 2 | T | Pressable toggle; aria-pressed on web. |
-| Tooltip | tooltip | 3 | T, P, O, Pos, K (web) | Web: hover/focus; native: long-press or press with delay. |
-| Typography | typography | 1 | T | Text presets (h1–h6, p, small, muted, etc.). |
-
----
-
-## Appendix B: Tier 1 “must ship” set (minimum viable catalog)
-Tier 1 items recommended to complete before starting Tier 2/3 overlays:
-- tokens, typography, button, button-group, input, textarea, input-group, label
-- card, badge, alert, separator, avatar, skeleton, spinner, progress, empty
-- (optional but high value) scroll-area, pagination
-
----
-
-## Appendix C: Registry item naming conventions
-- Namespace: `@shadniwind/<item>`
-- Kebab-case item names matching component slug (e.g., `alert-dialog`, `radio-group`)
-- Installed paths:
-  - `lib/*` for tokens/primitives
-  - `components/ui/*` for UI
-
----
-
-## Appendix D: Hard requirements to place at top of README
-- Unistyles v3 requires New Architecture + RN 0.78+; Expo SDK 53+; depends on nitro-modules and edge-to-edge; not Expo Go. :contentReference[oaicite:13]{index=13}
-- Configure Unistyles before app code runs / before any `StyleSheet.create`. :contentReference[oaicite:14]{index=14}
+- `CLAUDE.md` — agent guidance with a current-state Status section.
+- `HANDOFF.md` — one-page orientation for new sessions or fresh AIs.
+- `AGENTS.md` — short contributor guidelines + commands.
+- `README.md` — consumer-facing setup and install snippets.
+- `LICENSE` — MIT, © 2026 Agustín Oberg.
+- `specs/phase-0-restructure.md` — Phase 0 plan + progress tracker.
+- `specs/phase-1-stylesheet-foundations.md` — Phase 1 placeholder.
+- `specs/component-catalog.md` — Tier mapping + required primitives.
+- `specs/registry-protocol.md` — manifest format, build pipeline, URL scheme.

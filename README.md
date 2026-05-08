@@ -1,71 +1,59 @@
 # Leshi UI
 
-> **Status: rebrand in progress.** Leshi UI is a fork of [shadniwind](https://github.com/deicod/shadniwind). The rename, the new public registry URLs, and the upcoming **plain-StyleSheet** styling backend are still being landed. Until that work ships, the install snippets below still reference the original `shadniwind` registry. See `SPEC.md` §0.1 for the new direction.
+shadcn-style, source-distributed UI components for React Native (iOS / Android / Web) with interchangeable styling backends.
 
-**Leshi UI** is a collection of shadcn-style, source-distributed UI components specifically built for **React Native** and **React Native Web**.
+You don't `npm install` Leshi UI — you copy the components into your project. The shadcn CLI fetches each item's source from a static registry and writes it into your `lib/` and `components/ui/` directories. You own the code.
 
-Unlike traditional component libraries, Leshi UI components are provided as source code that you own and can customize. The current implementation leverages **react-native-unistyles v3.2+** for performance and flexibility; a second styling backend using plain `StyleSheet` (no native dependencies) is planned, and consumers will pick one flavor per project.
+> **Status.** The Unistyles flavor is published. The StyleSheet flavor (no native dependencies) is in active development; install snippets below show how to opt into Unistyles today.
 
-## Why Leshi UI?
+## Why Leshi UI
 
-- **Source Distributed**: Just like shadcn/ui, you copy the components into your project. You have full control.
-- **shadcn API Parity**: Component APIs, naming, and composition patterns mirror shadcn/ui — minimal cognitive switch when moving from web to RN.
-- **Two Styling Backends** *(StyleSheet flavor coming soon)*: Today, Unistyles v3.2+ powers high-performance styling, theming, and responsive design. A plain `StyleSheet` flavor with zero native dependencies is on the roadmap so projects that can't take Unistyles can still use Leshi UI.
-- **Native-First**: Optimized for React Native (iOS/Android) while maintaining excellent Web support.
-- **Nitro-Powered** *(Unistyles flavor)*: Uses `react-native-nitro-modules` for ultra-fast bridge communication.
+- **shadcn API parity.** Same prop shapes, slot composition, and naming conventions as shadcn/ui — minimal mental switch from web to RN.
+- **Universal apps.** One codebase ships to iOS, Android, and Web (via `react-native-web`). Components handle platform nuances (hover on web, press on native) internally.
+- **Source-owned.** Like shadcn/ui, you copy components into your project. Customize, refactor, delete what you don't need — there's no library override to fight.
+- **Backend-swappable styling.** Pick a styling backend per project via shadcn's `style` field. Today: **Unistyles** (high-perf JSI, native deps). Soon: **StyleSheet** (plain RN `StyleSheet` + Context, zero native deps).
 
-## One Codebase, Any Platform
+## Hard requirements (Unistyles flavor)
 
-Leshi UI is designed for **Universal Apps**. You write your application code once using React Native primitives (`View`, `Text`, etc.), and it renders to the appropriate target:
-
-- **Mobile (iOS/Android)**: Renders true native UI components.
-- **Web**: Uses `react-native-web` to render standard HTML/CSS/DOM elements.
-
-You don't need to maintain separate projects. With the recommended Expo setup, you build one app and run it on multiple platforms:
-
-- `npx expo run:ios` (Runs on iOS Simulator/Device)
-- `npx expo run:android` (Runs on Android Emulator/Device)
-- `npx expo start --web` (Runs in your browser)
-
-Leshi UI components handle platform-specific nuances (like hover states on web vs. touch handling on native) internally, so you can focus on building features.
-
-## Hard Requirements (Unistyles flavor)
-
-These requirements apply to the current Unistyles-based components. The upcoming StyleSheet flavor will have a much smaller footprint (no nitro-modules, no New Architecture requirement) — its requirements will be documented when it ships.
-
-To use the Unistyles flavor of Leshi UI, your environment must meet these specifications:
-
-- **React Native 0.78+**: With the New Architecture enabled.
-- **Expo SDK 53+**: Using the dev client or prebuild flow. **Expo Go is not supported** due to native dependencies.
-- **Dependencies**: 
+- React Native 0.78+ with the New Architecture enabled.
+- Expo SDK 53+ using a development build or prebuild flow. **Expo Go is not supported.**
+- Dependencies installed automatically with the `tokens` item:
   - `react-native-unistyles >= 3.2.0`
   - `react-native-nitro-modules >= 0.35.2`
-- **Optional dependency**:
-  - `react-native-edge-to-edge >= 1.8.1` (if your app relies on its plugin/runtime behavior)
+- Optional: `react-native-edge-to-edge >= 1.8.1` if your app uses its plugin or runtime behavior.
 
-## Getting Started
+The StyleSheet flavor (when shipped) will drop the nitro-modules / New Architecture / Expo SDK 53 requirements.
 
-Follow these steps to initialize a new project with Leshi UI (Unistyles flavor).
+## One codebase, any platform
 
-> The install commands below currently target the legacy `shadniwind` registry hosted on GitHub Pages. They will be replaced with the Leshi UI registry URLs as part of the rebrand.
+```bash
+npx expo run:ios       # iOS simulator / device
+npx expo run:android   # Android emulator / device
+npx expo start --web   # browser
+```
 
-### 1. Create a Project
-Because the Unistyles flavor uses native dependencies (`react-native-nitro-modules`), you must use a **Development Build**. Expo Go is not supported.
+Leshi UI components handle hover / focus on web and press / long-press on native internally. You write `<View>` and `<Text>` once.
 
-Create a new Expo project:
+## Getting started
+
+Follow these steps to initialize a new project with the Unistyles flavor.
+
+### 1. Create the project
+
+Because the Unistyles flavor depends on `react-native-nitro-modules`, you must use a development build (Expo Go is not supported):
+
 ```bash
 npx create-expo-app@latest my-app
 cd my-app
-npx expo run:ios  # or run:android
+npx expo run:ios   # or run:android
 ```
 
 ### 2. Configure `components.json`
-The `components.json` file tells the shadcn CLI how to install components. Create this file in your project root:
 
 ```json
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
+  "style": "unistyles",
   "rsc": false,
   "tsx": true,
   "tailwind": {
@@ -82,37 +70,47 @@ The `components.json` file tells the shadcn CLI how to install components. Creat
     "hooks": "@/hooks"
   },
   "registries": {
-    "@shadniwind": "https://deicod.github.io/shadniwind/v1/r/{name}.json"
+    "@leshi-ui": "https://leshi-ui.pages.dev/v1/styles/{style}/r/{name}.json"
   }
 }
 ```
 
-**Key settings:** Registry names must be prefixed with `@`, and custom registry URLs must include `{name}`.
+The `{style}` placeholder is substituted from the `style` field above. To switch styling backend later, change `"style": "unistyles"` to `"style": "stylesheet"` (once the StyleSheet flavor publishes its first items).
 
-You can also add the registry via CLI:
-```bash
-npx shadcn@latest registry add "@shadniwind=https://deicod.github.io/shadniwind/v1/r/{name}.json"
-```
-
-### 3. Install Core Dependencies (Tokens)
-Install the `tokens` package. This sets up the base theme (colors, spacing, typography) and the styling engine configuration.
+You can register the namespace via CLI instead of editing manually:
 
 ```bash
-npx shadcn@latest add @shadniwind/tokens
+npx shadcn@latest registry add "@leshi-ui=https://leshi-ui.pages.dev/v1/styles/{style}/r/{name}.json"
 ```
-*Note: This will install `react-native-unistyles` and `react-native-nitro-modules`, then create `lib/tokens.ts`, `lib/unistyles.ts`, and `lib/unistyles-types.d.ts`.*
 
-### 4. Add the Unistyles Babel Plugin
-shadniwind components use the Unistyles v3 authoring model (`StyleSheet.create((theme) => ...)`, variants, and runtime theme access). Add the Unistyles Babel plugin so files in your app, `components/`, and `lib/` are processed correctly.
+### 3. Install tokens
 
-Use app-scoped absolute paths in `autoProcessPaths`. Do not pass bare folder names like `"components"` because the Unistyles plugin matches with `filename.includes(...)` and can accidentally process files in `node_modules`.
+The `tokens` item ships the theme contract, default light/dark themes, and the Unistyles wiring. It is the first thing every Leshi UI consumer installs.
+
+```bash
+npx shadcn@latest add @leshi-ui/tokens
+```
+
+This adds `react-native-unistyles` and `react-native-nitro-modules` to your dependencies and creates:
+
+- `lib/tokens/types.ts` — the `Theme` contract and `ThemeName` type.
+- `lib/tokens/default.ts` — `lightTheme`, `darkTheme`, the `tokens` constant, and the `space()` helper.
+- `lib/unistyles.ts` — calls `StyleSheet.configure` with both themes.
+- `lib/unistyles-types.d.ts` — Unistyles module augmentation.
+
+### 4. Add the Unistyles Babel plugin
+
+Leshi UI components use the Unistyles v3 authoring model (`StyleSheet.create((theme) => ...)`, variants, runtime theme access). Add the Unistyles Babel plugin so files in your app, `components/`, and `lib/` are processed.
+
+Use app-scoped absolute paths in `autoProcessPaths`. Do **not** pass bare folder names like `"components"` — the Unistyles plugin matches with `filename.includes(...)` and can accidentally process files in `node_modules`.
 
 **`babel.config.js`:**
+
 ```js
-const path = require("node:path");
+const path = require("node:path")
 
 module.exports = function (api) {
-  api.cache(true);
+  api.cache(true)
 
   return {
     presets: ["babel-preset-expo"],
@@ -128,21 +126,18 @@ module.exports = function (api) {
         },
       ],
     ],
-  };
-};
+  }
+}
 ```
 
-If you already have a Babel config, merge the Unistyles plugin into it instead of replacing your existing plugins.
-If your app keeps Unistyles-authored files in other local directories, add those with `path.join(__dirname, "...")` too.
+If you already have a Babel config, merge the Unistyles plugin in instead of replacing your existing plugins. If your app keeps Unistyles-authored files in other local directories, add them with `path.join(__dirname, "...")` too.
 
-### 5. Initialize Styling
-You must initialize Unistyles **before** Expo Router or your app modules import components that call `StyleSheet.create`.
+### 5. Initialize Unistyles
 
-**For Expo Router:**
-
-Update your entry point so Unistyles initializes before Expo Router resolves your routes.
+Unistyles must initialize **before** Expo Router or your app modules import any component that calls `StyleSheet.create`.
 
 **`package.json`:**
+
 ```json
 {
   "main": "index.ts"
@@ -150,23 +145,25 @@ Update your entry point so Unistyles initializes before Expo Router resolves you
 ```
 
 **`index.ts`:**
+
 ```tsx
-import "./lib/unistyles";
-import "expo-router/entry";
+import "./lib/unistyles"
+import "expo-router/entry"
 ```
 
-If you use Expo static web output, also add a root HTML file so Unistyles initializes during static rendering and emits its SSR CSS/hydration payload on the server render.
+If you use Expo static web output, also add a root HTML file so Unistyles initializes during static rendering and emits its SSR CSS / hydration payload on the server render.
 
 **`app/+html.tsx`:**
-```tsx
-import { ScrollViewStyleReset } from "expo-router/html";
-import type { PropsWithChildren } from "react";
-import { useServerUnistyles } from "react-native-unistyles";
 
-import "../lib/unistyles";
+```tsx
+import { ScrollViewStyleReset } from "expo-router/html"
+import type { PropsWithChildren } from "react"
+import { useServerUnistyles } from "react-native-unistyles"
+
+import "../lib/unistyles"
 
 export default function Root({ children }: PropsWithChildren) {
-  const serverUnistyles = useServerUnistyles({ includeRNWStyles: false });
+  const serverUnistyles = useServerUnistyles({ includeRNWStyles: false })
 
   return (
     <html lang="en">
@@ -182,34 +179,28 @@ export default function Root({ children }: PropsWithChildren) {
       </head>
       <body>{children}</body>
     </html>
-  );
+  )
 }
 ```
 
 Expo Router already handles the React Native Web stylesheet during export, so pass `includeRNWStyles: false` and let `useServerUnistyles` inject only the Unistyles SSR tags.
 
-**For Bare React Native (`App.tsx`):**
-```tsx
-import "./lib/unistyles";
-import React from "react";
-// ...
-```
+For bare React Native, just import `./lib/unistyles` once at the top of `App.tsx`.
 
-### 6. Setup Overlay System
-Install the `portal` primitive if you use components that float above your content, like Dialogs, Popovers, Tooltips, Drawers, and Sheets. Registry dependencies will install the portal files automatically for those components, but you still need to wire the root `PortalProvider` and `PortalHost` once.
+### 6. Set up the overlay system (if you use overlays)
+
+Components that float above content — Dialog, Popover, Tooltip, Drawer, Sheet — depend on the portal primitive. Registry dependencies will install the portal files automatically when you install one of those components, but you still need to wire `PortalProvider` and `PortalHost` once.
 
 ```bash
-npx shadcn@latest add @shadniwind/portal
+npx shadcn@latest add @leshi-ui/portal
 ```
 
-### 7. Wrap Your App
-Wrap your application root with `PortalProvider` and add a `PortalHost`.
+Wrap your app root:
 
-**For Expo Router (`app/_layout.tsx`):**
 ```tsx
-import { Slot } from "expo-router";
+import { Slot } from "expo-router"
 
-import { PortalHost, PortalProvider } from "@/lib/portal";
+import { PortalHost, PortalProvider } from "@/lib/portal"
 
 export default function RootLayout() {
   return (
@@ -217,26 +208,49 @@ export default function RootLayout() {
       <Slot />
       <PortalHost />
     </PortalProvider>
-  );
+  )
 }
 ```
 
-### 8. You're Ready!
-You can now start adding components:
+### 7. Add components
 
 ```bash
-npx shadcn@latest add @shadniwind/button
+npx shadcn@latest add @leshi-ui/button
 ```
 
-Then use it in your code:
 ```tsx
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button"
 
 export function HomeScreen() {
-  return (
-    <Button onPress={() => console.log('Pressed!')}>
-      Hello World
-    </Button>
-  );
+  return <Button onPress={() => console.log("Pressed!")}>Hello World</Button>
 }
 ```
+
+## Switching styling backend
+
+Once the StyleSheet flavor ships, switching is a single field in `components.json`:
+
+```diff
+-  "style": "unistyles",
++  "style": "stylesheet",
+```
+
+Then re-add the items you use:
+
+```bash
+npx shadcn@latest add @leshi-ui/tokens @leshi-ui/button
+```
+
+The component imports in your app code don't change — only the underlying styling implementation does.
+
+## Project status and architecture
+
+- `SPEC.md` — high-level mission, architecture overview, coding philosophy.
+- `specs/registry-protocol.md` — registry URL scheme, manifest format, build pipeline.
+- `specs/component-catalog.md` — Tier mapping + per-component required primitives.
+- `specs/phase-0-restructure.md` — current execution plan and progress tracker.
+- `LICENSE` — MIT.
+
+## Contributing
+
+See `AGENTS.md` for repo conventions, commands, and the contributor workflow.

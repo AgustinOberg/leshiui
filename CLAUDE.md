@@ -6,43 +6,27 @@ This file is auto-loaded by Claude Code at the start of every session in this re
 
 ## Status — read this first
 
-> **Phase 0 (Restructure & Rebrand) is in progress.** The repo is mid-migration. The working tree still has the legacy `registry-src/shadniwind/` layout in place, with rebrand documentation work landed on top.
+> **Phase 0 (Restructure & Rebrand) is nearly complete.** The structural rebrand has landed: tree moved to `registry-src/styles/unistyles/`, tokens extracted to `core/tokens/`, build script rewritten for multi-style discovery + import rewriting, public registry regenerated under the new URL scheme. Remaining work: full validation pass (step 12) and the final `grep -ri shadniwind` cleanup (step 16).
 >
-> **The authoritative plan is `specs/phase-0-restructure.md`.** It contains locked decisions, the final tree, the build script design, and a step-by-step execution plan. **Read it before any further work.**
->
-> **Progress is tracked in `specs/phase-0-restructure.md` §18 (Progress tracker).** Update it after every commit so the next session knows where to pick up.
+> **The authoritative plan is `specs/phase-0-restructure.md`.** It contains locked decisions, the final tree, the build script design, and a step-by-step execution plan with a **§18 progress tracker** that records each step's commit SHA. **Read both before any further work.**
 >
 > **Memory** (`/Users/agustinoberg/.claude/projects/-Users-agustinoberg-Documents-GitHub-LeshiUI/memory/MEMORY.md`) holds durable context: project intent, the user's coding philosophy, autonomy preferences, and language preference. Claude Code auto-loads it. If you are **not** Claude Code (different agent / fresh AI), read `HANDOFF.md` at repo root for a one-page orientation; it duplicates the essentials.
 
-### Current phase: Phase 0 — Restructure & Rebrand
+### Phase 0 progress — high level
 
-What's done so far in Phase 0 (commits land in `main`):
+Done: rebrand prep (package.json + LICENSE + cleanup), skeletons + reference specs, tree move (`shadniwind/` → `styles/unistyles/`), token extraction to `core/tokens/`, manifest migration with kebab-case + `core:` prefix, build script rewrite (multi-style + import rewriting), CI deploy job removal, public/ regeneration under `v1/styles/<style>/...`, tests + lint + typecheck verified at every commit.
 
-- Rebrand prep: `package.json` renamed, `LICENSE` (MIT, 2026, Agustín Oberg), `apps/expo-app/` deleted, `RESEARCH.md` and `TASKS.md` deleted, `apps/docs/README.md` and `apps/expo-app/`-area docs cleaned up, partial doc updates to `SPEC.md` / `CLAUDE.md` / `AGENTS.md` / `README.md`.
-
-What's pending in Phase 0:
-
-- File-system moves (`registry-src/shadniwind/` → `registry-src/styles/unistyles/`).
-- Manifest relocation (`registry-src/items/` → `registry-src/styles/unistyles/items/`).
-- Skeleton folders for `core/` and `styles/stylesheet/`.
-- Token extraction to `core/tokens/`.
-- Build script rewrite (multi-style + import rewriting).
-- Tests imports update.
-- `public/` regeneration with new URL scheme.
-- CI workflow update (remove deploy job).
-- Doc final rewrites (`SPEC.md`, `README.md`, `CLAUDE.md` polish, new `specs/phase-1-stylesheet-foundations.md` / `specs/component-catalog.md` / `specs/registry-protocol.md`).
-
-See `specs/phase-0-restructure.md` §11 for the numbered execution sequence and §18 for the live progress tracker.
+Pending: final validation sweep + `grep -ri shadniwind` clean check. See `specs/phase-0-restructure.md` §18 for per-step commit SHAs.
 
 ### When Phase 0 is done
 
-Update this Status section to "Phase 1 — StyleSheet flavor foundations" with the new pending list, and link `specs/phase-1-stylesheet-foundations.md`.
+Update this Status section to "Phase 1 — StyleSheet flavor foundations" with the new pending list, and link `specs/phase-1-stylesheet-foundations.md`. The Phase 1 spec already exists as a skeleton with open questions and a pre-flight checklist.
 
 ---
 
 ## What this repo is
 
-**Leshi UI** is a shadcn-style, source-distributed UI component library for React Native (iOS / Android / Web). It was forked from [shadniwind](https://github.com/deicod/shadniwind) and rebranded; legacy `shadniwind` references in the working tree are migration artifacts and will be gone by end of Phase 0.
+**Leshi UI** is a shadcn-style, source-distributed UI component library for React Native (iOS / Android / Web).
 
 The library is **not** an npm package. It builds a static **shadcn registry** (JSON files) that consumer apps install via `npx shadcn@latest add @leshi-ui/<item>`, which copies source files into the consumer's project.
 
@@ -51,7 +35,7 @@ The defining feature is **two interchangeable styling backends**:
 1. **Unistyles flavor** — current implementation; uses `react-native-unistyles` v3.
 2. **StyleSheet flavor** — Phase 1+; plain `StyleSheet` + Context-based theming, zero native dependencies.
 
-The consumer picks one flavor per project via `components.json`'s `style` field; shadcn's `{style}` URL placeholder routes to the right registry payload. They never coexist. Implementation parallels shadcn's Radix-vs-BaseUI swap: shared "recipe" (component logic, hooks, a11y, variants) in a flavor-agnostic core, swappable styling layer.
+The consumer picks one flavor per project via `components.json`'s `style` field; shadcn's `{style}` URL placeholder routes to the right registry payload. They never coexist. Implementation parallels shadcn's Radix-vs-BaseUI swap: a shared "recipe" (component logic, hooks, a11y wiring) in `registry-src/core/`, with the styling layer per `registry-src/styles/<style>/`.
 
 Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy for now). Repo: `https://github.com/AgustinOberg/leshiui`.
 
@@ -82,19 +66,39 @@ Run from repo root:
 
 ---
 
-## Architecture today (mid-Phase-0)
+## Architecture
 
-Three-layer registry. Install order in a consumer mirrors this order.
+Source layout:
 
-1. **Tokens & theme** (`registry-src/shadniwind/lib/` today; will be `registry-src/styles/unistyles/lib/` + `registry-src/core/tokens/` after Phase 0): `tokens.ts` (values + `Theme` type), `unistyles.ts` (calls `StyleSheet.configure`), `unistyles-types.d.ts` (TS module augmentation). Consumer must import `lib/unistyles.ts` once at startup *before* any `StyleSheet.create` runs.
-2. **Primitives** (`registry-src/shadniwind/primitives/` today; will be `registry-src/styles/unistyles/primitives/` after Phase 0): `portal`, `overlay`, `positioning`, `focus`, `roving-focus`, `scroll-lock`, `press`, `a11y`. Cross-platform building blocks. Platform splits use `.native.tsx` / `.web.tsx`; shared types in `*.types.ts`.
-3. **UI components** (`registry-src/shadniwind/ui/` today; will be `registry-src/styles/unistyles/ui/` after Phase 0): the public catalog. Each component uses Unistyles v3 `StyleSheet.create((theme) => ...)` with variants for `variant` / `size` / state.
+```
+registry-src/
+├── core/                       # flavor-agnostic
+│   ├── primitives/             # (Phase 1+: pure-logic primitive extraction)
+│   ├── tokens/                 # types.ts (Theme contract) + default.ts (HSL values + space() helper)
+│   ├── variants/               # (Phase 1+: cva-like helper)
+│   └── web-ui/                 # (Phase 1+: useWebUi hook for hover / focus / active on RN Web)
+└── styles/
+    ├── unistyles/              # current Unistyles flavor
+    │   ├── lib/                # unistyles.ts wiring + module augmentation
+    │   ├── primitives/         # portal, overlay, positioning, focus, roving-focus, scroll-lock, press, a11y
+    │   ├── ui/                 # public catalog (60+ components)
+    │   └── items/              # per-item manifests (.manifest.json)
+    └── stylesheet/             # Phase 1 skeleton
+```
 
-### Registry build pipeline (current)
+Three install layers mirror the install order in a consumer:
 
-- Each item declared by a manifest at `registry-src/items/<name>.manifest.json` (will move to `registry-src/styles/unistyles/items/` after Phase 0).
-- `scripts/build-registry.ts` embeds file contents into JSON and emits to `public/v1/r/<name>.json` and `public/registry.json`.
-- Will be rewritten in Phase 0 step 9 to emit `public/v1/styles/<style>/r/<name>.json` and `public/v1/styles/<style>/registry.json`.
+1. **Tokens & theme** — `core/tokens/` ships into the consumer's `lib/tokens/{types,default}.ts` along with the flavor's wiring file (`lib/unistyles.ts` for the Unistyles flavor). Consumer imports `lib/unistyles` once at startup before any `StyleSheet.create`.
+2. **Primitives** — `styles/<style>/primitives/`. Cross-platform building blocks; platform splits via `.web.tsx` / `.native.tsx`; shared types in `*.types.ts`.
+3. **UI components** — `styles/<style>/ui/`. Single-file shadcn-style `.tsx` per component. The Unistyles flavor uses `StyleSheet.create((theme) => ...)` with variants.
+
+### Registry build pipeline
+
+- Each item is declared by a manifest at `registry-src/styles/<style>/items/<name>.manifest.json`.
+- Manifest sources default to relative under `registry-src/styles/<style>/`. Prefix with `core:` to address files in `registry-src/core/`.
+- `scripts/build-registry.ts` discovers styles dynamically (walks `registry-src/styles/*/`), reads manifests, embeds files, rewrites cross-tree imports to install-relative paths, validates against the shadcn registry-item schema, and emits per-style indexes + items.
+- Output: `public/v1/registry.json` (top-level index) + `public/v1/styles/<style>/{registry.json,r/*.json}`.
+- See `specs/registry-protocol.md` for the full protocol; see `scripts/build-registry.ts` for implementation.
 
 ---
 
@@ -127,12 +131,15 @@ Tests in `tests/*.test.ts` use Node's built-in `node:test` + `node:assert` with 
 
 ## Reference docs
 
-- `SPEC.md` — high-level overview. **In flux during Phase 0**; the authoritative current plan is in `specs/`.
+- `SPEC.md` — high-level mission, architecture, coding philosophy.
 - `specs/phase-0-restructure.md` — current actionable plan + progress tracker.
+- `specs/phase-1-stylesheet-foundations.md` — Phase 1 skeleton (StyleSheet flavor).
+- `specs/component-catalog.md` — Tier mapping + per-component required primitives.
+- `specs/registry-protocol.md` — manifest format, build pipeline, URL scheme.
 - `AGENTS.md` — short contributor guidelines.
 - `HANDOFF.md` — one-page handoff for non-Claude-Code agents.
-- `README.md` — consumer-facing setup. **Currently mid-rebrand** — install snippets still reference legacy URLs; full rewrite happens in Phase 0 step 12.
-- `LICENSE` — MIT.
+- `README.md` — consumer-facing setup with the new registry URL.
+- `LICENSE` — MIT, © 2026 Agustín Oberg.
 
 ---
 

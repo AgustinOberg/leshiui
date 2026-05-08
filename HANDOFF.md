@@ -15,7 +15,7 @@ Repo: `https://github.com/AgustinOberg/leshiui`. Hosting: `https://leshi-ui.page
 
 ## Where you are right now
 
-**Phase 0 (Restructure & Rebrand) is in progress.** The repo is mid-migration. The working tree still has the legacy `registry-src/shadniwind/` layout; rebrand documentation has landed on top.
+**Phase 0 (Restructure & Rebrand) is nearly complete.** The structural work has landed: tree at `registry-src/styles/unistyles/`, tokens extracted to `core/tokens/`, build script rewritten for multi-style discovery + import rewriting, `public/` regenerated under `v1/styles/<style>/...`. Final validation and the `grep -ri shadniwind` cleanup are the only steps left. Check `specs/phase-0-restructure.md` §18 for per-step commit SHAs.
 
 ## What to read, in order
 
@@ -23,7 +23,7 @@ Repo: `https://github.com/AgustinOberg/leshiui`. Hosting: `https://leshi-ui.page
 2. **`specs/phase-0-restructure.md`** — the **authoritative active plan**. Locked decisions, final tree, build script design, step-by-step execution plan, and a **progress tracker (§18)** with which steps are done.
 3. **`AGENTS.md`** — short contributor guidelines, commands, style.
 4. **`SPEC.md`** — high-level project spec. **Currently in flux** during Phase 0; treat `specs/` as canonical for current direction until Phase 0 step 14 rewrites this file.
-5. **`README.md`** — consumer-facing install instructions. **Currently mid-rebrand** — snippets still reference the legacy `shadniwind` registry URL. Don't trust them yet; full rewrite is Phase 0 step 14.
+5. **`README.md`** — consumer-facing install instructions with the live `https://leshi-ui.pages.dev/v1/styles/{style}/r/{name}.json` registry URL. Trust these.
 
 ## Coding philosophy (binding)
 

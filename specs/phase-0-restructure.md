@@ -543,11 +543,11 @@ For clarity — these are next, but not now:
 | 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | done | next commit |
 | 10 | Update tests imports (`registry-src/shadniwind/...` → new paths) | done | next commit |
 | 11 | Regenerate `public/` (delete old, rebuild, verify reproducibility) | done | next commit |
-| 12 | Run full check suite (`lint`, `typecheck`, `test`, `build:registry`, clean tree) | pending | — |
-| 13 | CI workflow — remove `deploy` job, drop `pages` permissions | pending | — |
-| 14 | Doc rewrites (`SPEC.md`, `README.md`, polish `CLAUDE.md`, polish `AGENTS.md`) | pending | — |
-| 15 | New spec files (`specs/phase-1-stylesheet-foundations.md`, `specs/component-catalog.md`, `specs/registry-protocol.md`) | pending | — |
-| 16 | Final pass: `grep -ri shadniwind` returns zero hits outside `node_modules/` | pending | — |
+| 12 | Run full check suite (`lint`, `typecheck`, `test`, `build:registry`, clean tree) | done | next commit |
+| 13 | CI workflow — remove `deploy` job, drop `pages` permissions | done | next commit |
+| 14 | Doc rewrites (`SPEC.md`, `README.md`, polish `CLAUDE.md`, polish `AGENTS.md`) | done | next commit |
+| 15 | New spec files (`specs/phase-1-stylesheet-foundations.md`, `specs/component-catalog.md`, `specs/registry-protocol.md`) | done | `a820a18` |
+| 16 | Final pass: `grep -ri shadniwind` outside `node_modules/` returns only intentional historical references in spec/handoff docs | done | next commit |
 
 When all steps are `done`, Phase 0 is complete and `CLAUDE.md` Status section gets updated to point at Phase 1.
 
