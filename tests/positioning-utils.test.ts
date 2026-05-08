@@ -9,11 +9,11 @@ import {
   detectOverflow,
   getOppositeSide,
   parsePlacement,
-} from "../registry-src/shadniwind/primitives/positioning/positioning-utils.js"
+} from "../registry-src/styles/unistyles/primitives/positioning/positioning-utils.js"
 import type {
   Rect,
   Viewport,
-} from "../registry-src/shadniwind/primitives/positioning/types.js"
+} from "../registry-src/styles/unistyles/primitives/positioning/types.js"
 
 test("parsePlacement extracts side and alignment from placement strings", () => {
   assert.deepStrictEqual(parsePlacement("top"), {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { PortalStore } from "../registry-src/shadniwind/primitives/portal/portal-store.js"
+import { PortalStore } from "../registry-src/styles/unistyles/primitives/portal/portal-store.js"
 
 test("PortalStore mounts nodes per host and preserves order", () => {
   const store = new PortalStore()

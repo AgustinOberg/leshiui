@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 
-import { resolveDismissLayerState } from "../registry-src/shadniwind/primitives/overlay/dismiss-layer-state.js"
+import { resolveDismissLayerState } from "../registry-src/styles/unistyles/primitives/overlay/dismiss-layer-state.js"
 
 test("resolveDismissLayerState defaults to non-dismissable without scrim", () => {
   const state = resolveDismissLayerState({})
