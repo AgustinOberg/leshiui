@@ -1,22 +1,23 @@
 import { StyleSheet } from "react-native-unistyles"
 
-import { darkTheme, lightTheme } from "./tokens.js"
+import { darkTheme, lightTheme } from "../../../core/tokens/default.js"
 
 /**
- * Unistyles Initialization.
+ * Unistyles initialization.
  *
- * This file configures the `react-native-unistyles` library with our custom themes (light/dark)
- * and settings.
+ * Configures `react-native-unistyles` with the light and dark themes from
+ * `core/tokens/`. Both themes share the same shape (`Theme` from
+ * `core/tokens/types.ts`) so swapping themes at runtime is type-safe.
  *
- * IMPORTANT: This file must be imported exactly once from your app entry point
- * BEFORE any components or style sheets are imported.
+ * IMPORTANT: import this module exactly once from the consumer's app entry
+ * point BEFORE any component or stylesheet is imported. Failure to do so
+ * results in Unistyles errors or unstyled content.
  *
- * For Expo Router, use a custom `index.ts` entry file and import this module there.
- * If you use Expo static web rendering, also import it from `app/+html.tsx`
- * and render `useServerUnistyles()` inside that file's `<head>`.
- * Failure to do so will result in Unistyles errors or unstyled content.
+ * For Expo Router, use a custom `index.ts` entry file and import this module
+ * there. If using Expo static web rendering, also import it from
+ * `app/+html.tsx` and render `useServerUnistyles()` inside that file's
+ * `<head>`.
  */
-// Import this module exactly once, before any StyleSheet.create usage.
 StyleSheet.configure({
   themes: {
     light: lightTheme,

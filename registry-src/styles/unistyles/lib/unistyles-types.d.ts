@@ -1,4 +1,4 @@
-import type { Theme } from "./tokens.js"
+import type { Theme } from "../../../core/tokens/types.js"
 
 declare module "react-native-unistyles" {
   export interface UnistylesThemes {

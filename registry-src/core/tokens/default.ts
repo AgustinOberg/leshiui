@@ -1,6 +1,9 @@
 /**
- * The core design tokens for shadniwind.
- * These tokens define the shared geometry, typography, and spacing used across all components.
+ * The core design tokens for Leshi UI.
+ *
+ * These tokens define the shared geometry, typography, and spacing used across
+ * all components. Color values live in `lightTheme.colors` and `darkTheme.colors`
+ * below; everything else is shared between themes.
  */
 export const tokens = {
   /** Border radius presets. */
@@ -9,7 +12,7 @@ export const tokens = {
     md: 8,
     lg: 12,
   },
-  /** Typography configuration including font families, sizes, line heights, and weights. */
+  /** Typography configuration: font families, sizes, line heights, weights. */
   typography: {
     families: {
       sans: "System",
@@ -36,7 +39,7 @@ export const tokens = {
       bold: "700",
     },
   },
-  /** Spacing scale (4px base). */
+  /** Spacing scale on a 4px grid. */
   spacing: {
     0: 0,
     1: 4,
@@ -55,7 +58,7 @@ export const tokens = {
 } as const
 
 /**
- * The standard Light Theme configuration.
+ * Default light theme.
  */
 export const lightTheme = {
   ...tokens,
@@ -83,7 +86,7 @@ export const lightTheme = {
 } as const
 
 /**
- * The standard Dark Theme configuration.
+ * Default dark theme.
  */
 export const darkTheme = {
   ...tokens,
@@ -111,7 +114,13 @@ export const darkTheme = {
 } as const
 
 /**
- * The theme structure used by Unistyles.
+ * The semantic theme contract.
+ *
+ * Every styling backend (Unistyles flavor, StyleSheet flavor, future flavors)
+ * must produce themes that satisfy this shape. Geometry and typography fields
+ * carry literal types via `typeof tokens.X` so backends like Unistyles can
+ * infer variant keys from the values; color fields are generic strings because
+ * the literal HSL strings are not load-bearing for the type system.
  */
 export type Theme = {
   radius: typeof tokens.radius
@@ -141,9 +150,15 @@ export type Theme = {
 }
 
 /**
- * Utility to calculate spacing based on a 4px grid.
- * @param value - The multiplier (e.g., 4 results in 16px).
- * @returns The calculated spacing in pixels.
+ * Built-in theme name. Consumers can extend via module augmentation.
+ */
+export type ThemeName = "light" | "dark"
+
+/**
+ * Compute spacing on the 4px grid.
+ *
+ * @param value - Multiplier (e.g., 4 → 16px).
+ * @returns Pixel value.
  */
 export function space(value: number): number {
   return value * 4

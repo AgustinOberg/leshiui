@@ -537,8 +537,8 @@ For clarity — these are next, but not now:
 | 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | done | next commit |
 | 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | done | next commit |
 | 5 | Move Unistyles tree (`shadniwind/{lib,ui,primitives}` → `styles/unistyles/{lib,ui,primitives}`) | done | next commit |
-| 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | pending | — |
-| 7 | Update primitive/UI imports — none required; sibling imports survive the move (verify during execution) | pending | — |
+| 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | done | next commit |
+| 7 | Update primitive/UI imports — none required; sibling imports survive the move (verified) | done | n/a |
 | 8 | Migrate manifests to `registry-src/styles/unistyles/items/`; apply kebab-case to `path`; tokens manifest swaps to new shape | pending | — |
 | 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | pending | — |
 | 10 | Update tests imports (`registry-src/shadniwind/...` → new paths) | done | next commit |
