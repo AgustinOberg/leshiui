@@ -6,21 +6,11 @@ This file is auto-loaded by Claude Code at the start of every session in this re
 
 ## Status — read this first
 
-> **Phase 0 (Restructure & Rebrand) is nearly complete.** The structural rebrand has landed: tree moved to `registry-src/styles/unistyles/`, tokens extracted to `core/tokens/`, build script rewritten for multi-style discovery + import rewriting, public registry regenerated under the new URL scheme. Remaining work: full validation pass (step 12) and the final `grep -ri shadniwind` cleanup (step 16).
+> **Phase 0 (Restructure & Rebrand) is complete.** The full structural rebrand landed across 7 commits on `main`: rename, LICENSE, deletions, folder skeletons, tree move, token extraction to `core/`, build script rewrite (multi-style discovery + import rewriting), manifest migration with kebab-case + `core:` prefix, public registry regenerated, CI deploy job removed, all docs rewritten. Validation: `lint`, `typecheck`, `test` (28/28), `build:registry` (idempotent — clean tree after rerun) all green. See `specs/phase-0-restructure.md` §18 for the per-step commit map.
 >
-> **The authoritative plan is `specs/phase-0-restructure.md`.** It contains locked decisions, the final tree, the build script design, and a step-by-step execution plan with a **§18 progress tracker** that records each step's commit SHA. **Read both before any further work.**
+> **Next: Phase 1 — StyleSheet flavor foundations.** The skeleton spec lives at `specs/phase-1-stylesheet-foundations.md` with a pre-flight checklist + open questions to surface before execution starts. Don't start Phase 1 work without first running through that checklist with the user.
 >
 > **Memory** (`/Users/agustinoberg/.claude/projects/-Users-agustinoberg-Documents-GitHub-LeshiUI/memory/MEMORY.md`) holds durable context: project intent, the user's coding philosophy, autonomy preferences, and language preference. Claude Code auto-loads it. If you are **not** Claude Code (different agent / fresh AI), read `HANDOFF.md` at repo root for a one-page orientation; it duplicates the essentials.
-
-### Phase 0 progress — high level
-
-Done: rebrand prep (package.json + LICENSE + cleanup), skeletons + reference specs, tree move (`shadniwind/` → `styles/unistyles/`), token extraction to `core/tokens/`, manifest migration with kebab-case + `core:` prefix, build script rewrite (multi-style + import rewriting), CI deploy job removal, public/ regeneration under `v1/styles/<style>/...`, tests + lint + typecheck verified at every commit.
-
-Pending: final validation sweep + `grep -ri shadniwind` clean check. See `specs/phase-0-restructure.md` §18 for per-step commit SHAs.
-
-### When Phase 0 is done
-
-Update this Status section to "Phase 1 — StyleSheet flavor foundations" with the new pending list, and link `specs/phase-1-stylesheet-foundations.md`. The Phase 1 spec already exists as a skeleton with open questions and a pre-flight checklist.
 
 ---
 

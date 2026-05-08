@@ -15,7 +15,7 @@ Repo: `https://github.com/AgustinOberg/leshiui`. Hosting: `https://leshi-ui.page
 
 ## Where you are right now
 
-**Phase 0 (Restructure & Rebrand) is nearly complete.** The structural work has landed: tree at `registry-src/styles/unistyles/`, tokens extracted to `core/tokens/`, build script rewritten for multi-style discovery + import rewriting, `public/` regenerated under `v1/styles/<style>/...`. Final validation and the `grep -ri shadniwind` cleanup are the only steps left. Check `specs/phase-0-restructure.md` §18 for per-step commit SHAs.
+**Phase 0 (Restructure & Rebrand) is complete.** All 17 tracker rows in `specs/phase-0-restructure.md` §18 are marked done across 7 commits on `main`. Validation green: `lint`, `typecheck`, `test` (28/28), `build:registry` (idempotent). The next active phase is `specs/phase-1-stylesheet-foundations.md` (StyleSheet flavor); read its pre-flight checklist before starting any Phase 1 work.
 
 ## What to read, in order
 
@@ -36,15 +36,13 @@ Repo: `https://github.com/AgustinOberg/leshiui`. Hosting: `https://leshi-ui.page
 
 ## What to do next
 
-If continuing Phase 0:
+If starting Phase 1 (StyleSheet flavor):
 
-1. Open `specs/phase-0-restructure.md` §18 (Progress tracker).
-2. Find the first row marked `pending`.
-3. Execute that step per §11.
-4. Validate (`lint`, `typecheck`, `test`, `build:registry` if relevant).
-5. Commit narrowly with a message describing the step.
-6. Update §18 with the new short commit SHA.
-7. Move to the next pending row.
+1. Open `specs/phase-1-stylesheet-foundations.md`.
+2. Confirm the pre-flight checklist is satisfied on `main` HEAD.
+3. Walk the user through the open questions section (theme switching API, color scheme listener, variants memoization, Tier 1 catalog scope, playground strategy, form integrations).
+4. Once decisions are locked, draft the Phase 1 execution plan in that file (mirror Phase 0's §11 + §18 structure: numbered steps + a progress tracker).
+5. Then execute, committing per logical step and updating the tracker after each commit.
 
 If something breaks during execution: **fix it inline**, don't ask. The user signed off on autonomy. Mention what broke and how it was fixed in the commit message or running status update.
 

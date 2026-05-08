@@ -527,29 +527,29 @@ For clarity — these are next, but not now:
 
 ## 18. Progress tracker
 
-**Update this table after every commit.** Order matches §11. The "Commit" column is the short SHA of the commit that completed the step (or "in progress" / "pending" if not yet done).
+**Phase 0 complete.** All 17 rows landed across 7 commits on `main`. Order matches §11; the "Commit" column is the short SHA of the commit that completed each step.
 
 | # | Step | Status | Commit |
 |---|---|---|---|
 | 0 | Pre-Phase-0 docs cleanup (deletions, LICENSE, package.json rename, partial doc updates) | done | `8d7e7e0` |
-| 1 | Branding constants in build script (`REGISTRY_NAME`, `REGISTRY_BASE_URL`, `REGISTRY_HOMEPAGE`) | done | next commit |
-| 2 | LICENSE | done | `8d7e7e0` |
-| 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | done | next commit |
-| 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | done | next commit |
-| 5 | Move Unistyles tree (`shadniwind/{lib,ui,primitives}` → `styles/unistyles/{lib,ui,primitives}`) | done | next commit |
-| 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | done | next commit |
-| 7 | Update primitive/UI imports — none required; sibling imports survive the move (verified) | done | n/a |
-| 8 | Migrate manifests to `registry-src/styles/unistyles/items/`; apply kebab-case to `path`; tokens manifest swaps to new shape | done | next commit |
-| 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | done | next commit |
-| 10 | Update tests imports (`registry-src/shadniwind/...` → new paths) | done | next commit |
-| 11 | Regenerate `public/` (delete old, rebuild, verify reproducibility) | done | next commit |
-| 12 | Run full check suite (`lint`, `typecheck`, `test`, `build:registry`, clean tree) | done | next commit |
-| 13 | CI workflow — remove `deploy` job, drop `pages` permissions | done | next commit |
-| 14 | Doc rewrites (`SPEC.md`, `README.md`, polish `CLAUDE.md`, polish `AGENTS.md`) | done | next commit |
+| 1 | Branding constants in build script (`REGISTRY_NAME`, `REGISTRY_BASE_URL`, `REGISTRY_HOMEPAGE`) | done | `e676f4b` |
+| 2 | LICENSE (MIT, © 2026 Agustín Oberg) | done | `8d7e7e0` |
+| 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | done | `a820a18` |
+| 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | done | `a820a18` |
+| 5 | Move Unistyles tree (`shadniwind/{lib,ui,primitives}` → `styles/unistyles/{lib,ui,primitives}`) via `git mv` so history survives | done | `e904ff5` |
+| 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | done | `8bcaa62` |
+| 7 | Update primitive/UI imports — none required; sibling imports survived the move (verified at `e904ff5`) | done | `e904ff5` |
+| 8 | Migrate manifests to `registry-src/styles/unistyles/items/`; apply kebab-case to `path`; tokens manifest swaps to new shape with `core:` prefix | done | `e676f4b` |
+| 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | done | `e676f4b` |
+| 10 | Update tests imports (`registry-src/shadniwind/...` → `registry-src/styles/unistyles/...`) | done | `e904ff5` |
+| 11 | Regenerate `public/` under `v1/styles/<style>/...` (legacy paths gone) | done | `e676f4b` |
+| 12 | Run full check suite (`lint`, `typecheck`, `test`, `build:registry`, clean tree) | done | `44b90f2` |
+| 13 | CI workflow — remove `deploy` job, drop `pages` permissions, add explicit `npm test` step | done | `44b90f2` |
+| 14 | Doc rewrites (`SPEC.md`, `README.md`, polish `CLAUDE.md`, polish `AGENTS.md`, polish `HANDOFF.md`) | done | `44b90f2` |
 | 15 | New spec files (`specs/phase-1-stylesheet-foundations.md`, `specs/component-catalog.md`, `specs/registry-protocol.md`) | done | `a820a18` |
-| 16 | Final pass: `grep -ri shadniwind` outside `node_modules/` returns only intentional historical references in spec/handoff docs | done | next commit |
+| 16 | Final pass: `grep -ri shadniwind` outside `node_modules/` returns only intentional historical references in spec/handoff docs documenting the migration | done | `44b90f2` |
 
-When all steps are `done`, Phase 0 is complete and `CLAUDE.md` Status section gets updated to point at Phase 1.
+The next phase (`specs/phase-1-stylesheet-foundations.md`) is the active spec going forward; pre-flight checks listed there should pass on `main` HEAD before Phase 1 execution begins.
 
 ## 17. Risks
 
