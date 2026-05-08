@@ -525,6 +525,32 @@ For clarity — these are next, but not now:
 
 ---
 
+## 18. Progress tracker
+
+**Update this table after every commit.** Order matches §11. The "Commit" column is the short SHA of the commit that completed the step (or "in progress" / "pending" if not yet done).
+
+| # | Step | Status | Commit |
+|---|---|---|---|
+| 0 | Pre-Phase-0 docs cleanup (deletions, LICENSE, package.json rename, partial doc updates) | done | `8d7e7e0` |
+| 1 | Branding constants in build script (`REGISTRY_NAME`, `REGISTRY_BASE_URL`, `REGISTRY_HOMEPAGE`) | pending | — |
+| 2 | LICENSE | done | `8d7e7e0` |
+| 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | pending | — |
+| 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | pending | — |
+| 5 | Move Unistyles tree (`shadniwind/{lib,ui,primitives}` → `styles/unistyles/{lib,ui,primitives}`) | pending | — |
+| 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | pending | — |
+| 7 | Update primitive/UI imports — none required; sibling imports survive the move (verify during execution) | pending | — |
+| 8 | Migrate manifests to `registry-src/styles/unistyles/items/`; apply kebab-case to `path`; tokens manifest swaps to new shape | pending | — |
+| 9 | Rewrite build script (multi-style discovery + import rewriter §9.1) | pending | — |
+| 10 | Update tests imports (`registry-src/shadniwind/...` → new paths) | pending | — |
+| 11 | Regenerate `public/` (delete old, rebuild, verify reproducibility) | pending | — |
+| 12 | Run full check suite (`lint`, `typecheck`, `test`, `build:registry`, clean tree) | pending | — |
+| 13 | CI workflow — remove `deploy` job, drop `pages` permissions | pending | — |
+| 14 | Doc rewrites (`SPEC.md`, `README.md`, polish `CLAUDE.md`, polish `AGENTS.md`) | pending | — |
+| 15 | New spec files (`specs/phase-1-stylesheet-foundations.md`, `specs/component-catalog.md`, `specs/registry-protocol.md`) | pending | — |
+| 16 | Final pass: `grep -ri shadniwind` returns zero hits outside `node_modules/` | pending | — |
+
+When all steps are `done`, Phase 0 is complete and `CLAUDE.md` Status section gets updated to point at Phase 1.
+
 ## 17. Risks
 
 - **Token shape change** — if the existing `lib/tokens.ts` doesn't use HSL strings, converting them is a non-trivial value transform. Need to inspect during execution. If they're already HSL, zero risk. If not, I pause and confirm the conversion strategy.
