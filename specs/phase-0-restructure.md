@@ -534,8 +534,8 @@ For clarity — these are next, but not now:
 | 0 | Pre-Phase-0 docs cleanup (deletions, LICENSE, package.json rename, partial doc updates) | done | `8d7e7e0` |
 | 1 | Branding constants in build script (`REGISTRY_NAME`, `REGISTRY_BASE_URL`, `REGISTRY_HOMEPAGE`) | pending | — |
 | 2 | LICENSE | done | `8d7e7e0` |
-| 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | pending | — |
-| 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | pending | — |
+| 3 | Create new folders empty (`core/`, `styles/unistyles/`, `styles/stylesheet/`) | done | next commit |
+| 4 | Create skeleton READMEs in placeholder folders + Phase 1 spec stubs | done | next commit |
 | 5 | Move Unistyles tree (`shadniwind/{lib,ui,primitives}` → `styles/unistyles/{lib,ui,primitives}`) | pending | — |
 | 6 | Extract tokens to core (`core/tokens/types.ts`, `core/tokens/default.ts`); update `unistyles.ts` + `unistyles-types.d.ts` imports; delete old `lib/tokens.ts` | pending | — |
 | 7 | Update primitive/UI imports — none required; sibling imports survive the move (verify during execution) | pending | — |
