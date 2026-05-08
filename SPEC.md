@@ -1,12 +1,46 @@
-# SPEC: shadniwind (github.com/deicod/shadniwind)
-shadcn-style *source-distributed* UI components for React Native (iOS/Android) + React Native Web, built on react-native-unistyles v3, with an internal PortalHost overlay foundation (Option A).
+# SPEC: Leshi UI
+
+shadcn-style *source-distributed* UI components for React Native (iOS/Android) + React Native Web, with an internal PortalHost overlay foundation (Option A) and **two interchangeable styling backends** (Unistyles + plain StyleSheet).
+
+> **Fork status:** Leshi UI is a fork of [shadniwind](https://github.com/deicod/shadniwind). Most of this spec was inherited from shadniwind and remains valid for the **Unistyles flavor**. References to `shadniwind` (item names, paths, registry URLs) throughout this document are legacy and will be migrated as part of the rebrand. The dual-backend work described in §0.1 is the defining new requirement.
 
 This document is intended to be handed to an implementation agent to derive milestones/tasks.
 
 ---
 
 ## 0. Executive summary
-shadniwind is a **static registry** of installable “items” (tokens, primitives, components) that are **copied as source files** into a consumer app (the shadcn/ui distribution model). Each installed component is editable in-app.
+Leshi UI is a **static registry** of installable "items" (tokens, primitives, components) that are **copied as source files** into a consumer app (the shadcn/ui distribution model). Each installed component is editable in-app.
+
+## 0.1 Project direction: dual styling backends
+
+Leshi UI ships two parallel styling backends. A consumer picks **one** per project; they do not coexist.
+
+1. **Unistyles flavor** — the existing implementation. Uses `react-native-unistyles` v3 with its native dependencies (nitro-modules, edge-to-edge, RN 0.78+ New Architecture, Expo SDK 53+). Best performance, theme runtime, web pseudo-states.
+2. **StyleSheet flavor** — to be added. Uses plain React Native `StyleSheet` with a Context-based theme provider. Zero native dependencies; works in any RN setup, including projects that can't or won't take Unistyles.
+
+Both flavors share a **flavor-agnostic core**: component composition, prop API, hooks, a11y wiring, keyboard handlers, variants logic. The styling layer is the only thing that differs. The model intentionally mirrors shadcn's Radix-vs-BaseUI swap: same recipe, different primitive layer.
+
+### Open architectural questions (not yet decided)
+
+The following are direction, not decisions. Implementation agents must confirm with the project owner before committing to one option:
+
+- **Source layout** — likely `registry-src/core/` (flavor-agnostic) + `registry-src/unistyles/` + `registry-src/stylesheet/` as parallel trees, with manifests fanning out into two separate registry outputs.
+- **Registry naming** — likely `@leshi-ui/unistyles` and `@leshi-ui/stylesheet` published as two registries built from one repo.
+- **Hosting** — public URL TBD; legacy `deicod.github.io/shadniwind` references remain in the build script and generated `public/` until decided.
+- **Theming for the StyleSheet flavor** — likely Context + `useTheme()` + a small dependency-free variant helper. No external dep (no CVA) unless explicitly approved.
+- **Token sharing** — TBD whether tokens are a single shared module both flavors consume, or each flavor has its own with the same shape.
+- **Migration scope** — TBD whether to port the full ~60-component catalog to the StyleSheet flavor up-front or start with Tier 1 (Appendix B) and grow.
+
+## 0.2 Coding philosophy (binding)
+
+Every component, primitive, and helper in Leshi UI must follow these rules. They are part of the spec, not just a style guide:
+
+1. **Mirror shadcn first.** Before writing or changing a component, look at the shadcn/ui equivalent and port its API to React Native. Match props, slot / composition patterns, file shape, and naming. Don't invent a new API when shadcn already defines one. Document any platform deviation in TSDoc.
+2. **Minimal dependencies.** No npm dependencies beyond Unistyles (Unistyles flavor only) and React/RN peer deps without explicit approval. Reimplement small helpers in-tree.
+3. **Single-file components.** Self-contained `.tsx` per public component: composition + variants + types + exports in one file. Split into hooks or sub-components only when genuinely unreadable. Cross-component logic goes in the primitives (or future core) layer.
+4. **Strict typing.** No `any`. Mirror shadcn's TS surface where applicable.
+5. **Performance and a11y are non-negotiable.** Correct `accessibilityRole`, aria mapping on web, keyboard support on web, screen reader support on native, no avoidable re-renders.
+6. **Reuse via primitives.** The existing primitives set (portal, overlay, positioning, focus, roving-focus, scroll-lock, press, a11y) is the reuse model. New cross-component logic belongs there.
 
 Target platforms from day 1:
 - iOS + Android (React Native)

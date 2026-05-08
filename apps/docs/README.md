@@ -1,10 +1,12 @@
-# shadniwind Documentation
+# Leshi UI Documentation
 
-Welcome to the `shadniwind` documentation. This directory contains detailed documentation for all primitives and components in the library.
+Markdown reference for Leshi UI primitives and components. This folder is currently a flat index; a proper documentation site (rendered, searchable, with live examples) is planned but not built yet.
+
+In the meantime, the **authoritative** documentation for any component is its TSDoc inside `registry-src/` — that is what ships into a consumer's project, where it shows up in their editor's hover tooltips. The pages below are companion material for cross-cutting concepts and examples.
 
 ## Primitives
 
-Primitives are the low-level building blocks that handle logic, accessibility, and platform differences. They are often headless or provide minimal styling.
+Low-level building blocks that handle logic, accessibility, and platform differences. Often headless or with minimal styling.
 
 - [Portal](./primitives/portal.md)
 - [Positioning](./primitives/positioning.md)
@@ -17,7 +19,7 @@ Primitives are the low-level building blocks that handle logic, accessibility, a
 
 ## Components
 
-Components are the visible UI elements that you use to build your application. They are built on top of primitives and styled using the design system.
+Visible UI elements built on top of primitives.
 
 - [Button](./components/button.md)
 - [Input](./components/input.md)

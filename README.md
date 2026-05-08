@@ -1,19 +1,22 @@
-# shadniwind
+# Leshi UI
 
-**shadniwind** is a collection of shadcn-style, source-distributed UI components specifically built for **React Native** and **React Native Web**. 
+> **Status: rebrand in progress.** Leshi UI is a fork of [shadniwind](https://github.com/deicod/shadniwind). The rename, the new public registry URLs, and the upcoming **plain-StyleSheet** styling backend are still being landed. Until that work ships, the install snippets below still reference the original `shadniwind` registry. See `SPEC.md` §0.1 for the new direction.
 
-Unlike traditional component libraries, shadniwind components are provided as source code that you own and can customize. It is built from the ground up to leverage the performance and flexibility of **react-native-unistyles v3.2+**.
+**Leshi UI** is a collection of shadcn-style, source-distributed UI components specifically built for **React Native** and **React Native Web**.
 
-## Why shadniwind?
+Unlike traditional component libraries, Leshi UI components are provided as source code that you own and can customize. The current implementation leverages **react-native-unistyles v3.2+** for performance and flexibility; a second styling backend using plain `StyleSheet` (no native dependencies) is planned, and consumers will pick one flavor per project.
+
+## Why Leshi UI?
 
 - **Source Distributed**: Just like shadcn/ui, you copy the components into your project. You have full control.
-- **Unistyles v3.2+**: Leverages the latest Unistyles for high-performance styling, theming, and responsive design.
+- **shadcn API Parity**: Component APIs, naming, and composition patterns mirror shadcn/ui — minimal cognitive switch when moving from web to RN.
+- **Two Styling Backends** *(StyleSheet flavor coming soon)*: Today, Unistyles v3.2+ powers high-performance styling, theming, and responsive design. A plain `StyleSheet` flavor with zero native dependencies is on the roadmap so projects that can't take Unistyles can still use Leshi UI.
 - **Native-First**: Optimized for React Native (iOS/Android) while maintaining excellent Web support.
-- **Nitro-Powered**: Uses `react-native-nitro-modules` for ultra-fast bridge communication.
+- **Nitro-Powered** *(Unistyles flavor)*: Uses `react-native-nitro-modules` for ultra-fast bridge communication.
 
 ## One Codebase, Any Platform
 
-shadniwind is designed for **Universal Apps**. You write your application code once using React Native primitives (`View`, `Text`, etc.), and it renders to the appropriate target:
+Leshi UI is designed for **Universal Apps**. You write your application code once using React Native primitives (`View`, `Text`, etc.), and it renders to the appropriate target:
 
 - **Mobile (iOS/Android)**: Renders true native UI components.
 - **Web**: Uses `react-native-web` to render standard HTML/CSS/DOM elements.
@@ -24,11 +27,13 @@ You don't need to maintain separate projects. With the recommended Expo setup, y
 - `npx expo run:android` (Runs on Android Emulator/Device)
 - `npx expo start --web` (Runs in your browser)
 
-shadniwind components handle platform-specific nuances (like hover states on web vs. touch handling on native) internally, so you can focus on building features.
+Leshi UI components handle platform-specific nuances (like hover states on web vs. touch handling on native) internally, so you can focus on building features.
 
-## Hard Requirements
+## Hard Requirements (Unistyles flavor)
 
-To use shadniwind, your environment must meet these specifications:
+These requirements apply to the current Unistyles-based components. The upcoming StyleSheet flavor will have a much smaller footprint (no nitro-modules, no New Architecture requirement) — its requirements will be documented when it ships.
+
+To use the Unistyles flavor of Leshi UI, your environment must meet these specifications:
 
 - **React Native 0.78+**: With the New Architecture enabled.
 - **Expo SDK 53+**: Using the dev client or prebuild flow. **Expo Go is not supported** due to native dependencies.
@@ -40,10 +45,12 @@ To use shadniwind, your environment must meet these specifications:
 
 ## Getting Started
 
-Follow these steps to initialize a new project with shadniwind.
+Follow these steps to initialize a new project with Leshi UI (Unistyles flavor).
+
+> The install commands below currently target the legacy `shadniwind` registry hosted on GitHub Pages. They will be replaced with the Leshi UI registry URLs as part of the rebrand.
 
 ### 1. Create a Project
-Because shadniwind uses native dependencies (`react-native-nitro-modules`), you must use a **Development Build**. Expo Go is not supported.
+Because the Unistyles flavor uses native dependencies (`react-native-nitro-modules`), you must use a **Development Build**. Expo Go is not supported.
 
 Create a new Expo project:
 ```bash
