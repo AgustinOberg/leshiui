@@ -1,6 +1,23 @@
 import { Platform } from "react-native"
 
 /**
+ * Leshi UI — `shadcn-default` theme.
+ *
+ * This palette mirrors shadcn/ui's default "zinc / neutral" baseColor: cool
+ * grays for surfaces, near-white primary on light, near-black primary on dark.
+ * It is the recommended starting point for new Leshi UI projects.
+ *
+ * The file name (`shadcn-default.ts`) is the theme's identity. To ship another
+ * theme (e.g. `shadcn-rose`, `shadcn-blue`, or a custom brand palette), add a
+ * sibling file under `core/tokens/` and publish it as its own registry item.
+ * Geometry, typography, and spacing tokens are shared across themes — only the
+ * `lightTheme.colors` / `darkTheme.colors` blocks differ.
+ *
+ * Identity:
+ */
+export const THEME_NAME = "shadcn-default" as const
+
+/**
  * Font family stacks.
  *
  * React Native's `"System"` keyword resolves to the platform default font on

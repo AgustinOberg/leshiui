@@ -1,1 +1,1 @@
-export type { Theme, ThemeName } from "./default"
+export type { Theme, ThemeName } from "./shadcn-default"

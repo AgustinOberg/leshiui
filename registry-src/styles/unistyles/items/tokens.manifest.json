@@ -2,7 +2,7 @@
   "name": "tokens",
   "type": "registry:lib",
   "title": "Tokens",
-  "description": "Semantic tokens (shared core) and Unistyles theme configuration.",
+  "description": "Semantic tokens with the shadcn-default palette + Unistyles theme configuration.",
   "dependencies": [
     "react-native-unistyles@^3.2.0",
     "react-native-nitro-modules@^0.35.2"
@@ -14,8 +14,8 @@
       "type": "registry:lib"
     },
     {
-      "source": "core:tokens/default.ts",
-      "path": "lib/tokens/default.ts",
+      "source": "core:tokens/shadcn-default.ts",
+      "path": "lib/tokens/shadcn-default.ts",
       "type": "registry:lib"
     },
     {

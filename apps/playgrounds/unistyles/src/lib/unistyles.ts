@@ -1,6 +1,9 @@
 import { StyleSheet } from "react-native-unistyles"
 
-import { darkTheme, lightTheme } from "./tokens/default"
+// Default palette is shadcn-default. To swap palettes, change this import to
+// another theme file (e.g. `./tokens/shadcn-rose.js`) — the rest of the file
+// stays the same.
+import { darkTheme, lightTheme } from "./tokens/shadcn-default"
 
 /**
  * Unistyles initialization.
