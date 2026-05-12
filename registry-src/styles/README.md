@@ -16,7 +16,7 @@ A consumer picks one flavor in their `components.json` via the `style` field. Th
 ## Current flavors
 
 - **`unistyles/`** — uses `react-native-unistyles` v3. Implementation migrated from the legacy `shadniwind/` tree in Phase 0.
-- **`stylesheet/`** — plain `StyleSheet` + Context-based theming. Skeleton in Phase 0; built out in Phase 1.
+- **`stylesheet/`** — plain `StyleSheet` + Context-based theming. Skeleton in Phase 0; built out in Phase 2.
 
 ## Flavors are autonomous
 

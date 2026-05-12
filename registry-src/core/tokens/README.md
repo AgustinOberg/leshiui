@@ -10,7 +10,7 @@ After Phase 0 step 6 lands:
 Each styling backend has its own thin wiring file in `styles/<style>/lib/` that consumes these and registers them with the backend's runtime:
 
 - Unistyles flavor: `styles/unistyles/lib/unistyles.ts` calls `StyleSheet.configure({ themes: { light, dark } })` with values imported from here.
-- StyleSheet flavor (Phase 1+): `styles/stylesheet/lib/theme-provider.tsx` exposes the same values via React Context and a `useTheme()` hook.
+- StyleSheet flavor (Phase 2+): `styles/stylesheet/lib/theme-provider.tsx` exposes the same values via React Context and a `useTheme()` hook.
 
 The `core/tokens/` files ship into the consumer's project as `lib/tokens/types.ts` and `lib/tokens/default.ts` (kebab-case install paths). The flavor's wiring file imports from `./tokens/default.js` after install — sibling-relative — because the build script rewrites the cross-tree source-time import (`../../../core/tokens/default.js`) to install-relative paths.
 

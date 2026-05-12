@@ -1,73 +1,88 @@
-# Repository Guidelines
+# AGENTS.md
 
-This is **Leshi UI** — a shadcn-style, source-distributed UI component library for React Native + RN Web with two interchangeable styling backends. Hosting at `https://leshi-ui.pages.dev`. Repo at `https://github.com/AgustinOberg/leshiui`.
+Canonical instructions for any AI agent working on **Leshi UI**. Claude Code loads this via `@AGENTS.md` from `CLAUDE.md`; other agents (Codex, Cursor, etc.) should read it directly. Read it in full at the start of every session.
 
-## Coding philosophy (read this first)
+## Status
 
-1. **Mirror shadcn first.** Look at how shadcn/ui implements something before writing the RN port. Match its props, naming, and composition patterns. Don't invent a new API when shadcn already defines one.
-2. **Minimal dependencies.** Don't add npm deps without explicit approval. Reimplement small helpers in-tree.
-3. **Single-file components.** Self-contained `.tsx` per component (composition + variants + types + exports). Split only when the file is genuinely hard to read. Cross-component logic goes in `primitives/` (or, when extracted in Phase 1+, `core/primitives/`).
-4. **Strict types, no `any`.**
-5. **Performance and accessibility are non-negotiable.** Correct roles / aria, keyboard on web, screen reader on native, no avoidable re-renders.
-6. **Reuse via primitives.** New cross-component logic belongs in the primitives layer, not duplicated across components.
+- **Phase 0** (Restructure & Rebrand) — done. See `specs/phase-0-restructure.md`.
+- **Phase 1** — TBD; spec not yet drafted. See `ROADMAP.md` for the full milestone list (Phases 1–8).
+- Don't start phase work before the active phase has a spec written and signed off.
 
-## Two styling backends
+## What this repo is
 
-Leshi UI ships **two interchangeable styling backends**, picked per consumer project (they don't coexist):
+Leshi UI is a shadcn-style, source-distributed UI component library for React Native (iOS / Android / Web). It is **not** an npm package — it publishes a static **shadcn registry** that consumers install via `npx shadcn@latest add @leshi-ui/<item>`, copying source into their project.
 
-- **Unistyles flavor** (`registry-src/styles/unistyles/`) — current implementation; uses `react-native-unistyles` v3.
-- **StyleSheet flavor** (`registry-src/styles/stylesheet/`) — Phase 1 work; plain `StyleSheet` + Context-based theme provider, zero native deps. Skeleton in place.
+The defining feature is **two interchangeable styling backends**, picked per consumer project (they don't coexist):
 
-The shared "recipe" (theme contract, eventually pure-logic primitives) lives in `registry-src/core/`. Only styling implementation differs.
+- **Unistyles flavor** (`registry-src/styles/unistyles/`) — uses `react-native-unistyles` v3. Current implementation.
+- **StyleSheet flavor** (`registry-src/styles/stylesheet/`) — plain `StyleSheet` + Context theming, zero native deps. Skeleton only.
 
-## Project structure
+The shared "recipe" (theme contract, future pure-logic primitives) lives in `registry-src/core/`. Only the styling layer differs per flavor.
 
-- `registry-src/core/` — flavor-agnostic source. Contains `tokens/` (Theme contract + values) today; `primitives/`, `variants/`, `web-ui/` are skeletons for Phase 1+.
-- `registry-src/styles/<style>/{lib,primitives,ui,items}/` — per-style source trees. Each style is autonomous; manifests in `items/` reference local files (relative paths) or shared core files (`core:` prefix).
-- `public/v1/{registry.json,styles/<style>/{registry.json,r/*.json}}` — generated registry artifacts. Regenerate via `npm run build:registry`.
-- `schemas/` — JSON schemas for registry validation.
-- `scripts/build-registry.ts` — multi-style discovery + import rewriting + emission.
-- `tests/` — Node tests (`*.test.ts`) for headless primitive logic.
-- `specs/` — phase plans (`phase-0-restructure.md`, `phase-1-stylesheet-foundations.md`) and reference docs (`component-catalog.md`, `registry-protocol.md`).
-- `SPEC.md` — high-level mission + architecture overview.
-- `CLAUDE.md` — agent guidance with current Status section.
-- `HANDOFF.md` — one-page handoff for new sessions.
+Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy). Repo: `https://github.com/AgustinOberg/leshiui`.
 
-## Build, test, and development commands
+## Hard rules (binding)
 
-**Package manager: Bun.** Install Bun via [bun.sh](https://bun.sh). Don't use `npm`, `yarn`, or `pnpm` for this project — every command and CI step assumes `bun`. The lockfile is `bun.lock`; `package-lock.json` is not regenerated.
+1. **Mirror shadcn first.** Look at how shadcn/ui implements a component (props, slot composition, naming, file shape) and port that to React Native. Don't invent APIs when shadcn already defines one. Document any platform deviation in TSDoc.
+2. **Minimal dependencies.** No npm deps without explicit user approval. Reimplement small helpers in-tree. Bar: Unistyles only for that flavor, React/RN as peers. Form integrations (`form-rhf`, `form-tsf`) are opt-in items.
+3. **Single-file components.** Self-contained `.tsx` per component (composition + variants + types + exports). Split into hooks or sub-components only when genuinely unreadable. Cross-component logic goes in `primitives/`.
+4. **Strict typing. No `any`.** Mirror shadcn's TS surface.
+5. **Performance and accessibility are non-negotiable.** Correct `accessibilityRole` / aria, keyboard support on web, screen reader support on native, no avoidable re-renders.
+6. **Reuse via primitives.** New cross-component logic belongs in the primitives layer, not duplicated.
+7. **TSDoc on all exports.** Document *why* (purpose, lifecycle, platform caveats), not *what*. Components include `@example`.
 
-- `bun install` — install dependencies. `bun install --frozen-lockfile` in CI.
+## Commands
+
+**Package manager: Bun.** Never propose `npm`, `yarn`, or `pnpm` — every script and CI step assumes `bun`. The lockfile is `bun.lock`.
+
+- `bun install` — install deps.
 - `bun run lint` — Biome lint.
-- `bun run format` — Biome format.
 - `bun run check` — Biome lint + format + import organization.
-- `bun run typecheck` — `tsc --noEmit` for both `tsconfig.node.json` and `tsconfig.registry.json`.
-- `bun run build:registry` — regenerate registry artifacts into `public/`. CI fails if the tree is dirty afterwards, so commit the regenerated output.
-- `bun run test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/<file>.test.ts`. The test script keeps `node` as the runner because tests use the `node:test` API; Bun invokes it without changes.
-- `bun run deploy` — build `public/` and push to Cloudflare Pages production (`leshi-ui.pages.dev`) via `wrangler`. Authenticated against the project owner's Cloudflare account on the local machine; no CI secret required.
-- `bun run deploy:preview` — build and deploy to a one-off preview URL (no production replacement). Use to test a registry change without affecting live consumers.
-- Always run `bun run lint` and `bun run typecheck` after every change.
+- `bun run typecheck` — runs `typecheck:node` (tooling) + `typecheck:registry` (registry sources).
+- `bun run test` — `node --test --import tsx tests/**/*.test.ts`. Single: `node --test --import tsx tests/<file>.test.ts`. The runner stays on `node` because tests use `node:test`; Bun invokes it unchanged.
+- `bun run build:registry` — embeds files into `public/`. **CI fails if the tree is dirty afterwards** — commit regenerated artifacts after touching `registry-src/` or `schemas/`.
+- `bun run deploy` / `bun run deploy:preview` — Cloudflare Pages production / preview deploys via Wrangler. Maintainer-only; auth is local to the maintainer's machine.
 
-## Coding style and naming
+Always run `bun run lint` and `bun run typecheck` after every change.
 
-- Biome enforces formatting (2-space indent, double quotes, trailing commas, semicolons as needed, organized imports).
-- TypeScript + ES modules. Explicit imports and typed exports.
-- File naming: PascalCase for files exporting a single React component (e.g. `PortalHost.tsx`); kebab-case for utilities, stores, and hooks (e.g. `portal-store.ts`). Catalog files in `ui/` are kebab-case.
-- **Installed paths in manifests must be kebab-case** (e.g. `lib/portal/portal-host.tsx`). Source filenames may stay PascalCase; the build script rewrites imports to match the install layout.
-- **Unistyles flavor:** v3 API only — `StyleSheet.create((theme) => ...)` + `styles.useVariants(...)`. Do not use v2 (`createStyleSheet`, `useStyles`).
-- **StyleSheet flavor (Phase 1+):** plain `StyleSheet.create` + Context-based theme provider; variant helper from `core/variants/`; web pseudo-classes via `useWebUi` from `core/web-ui/`.
-- Inside registry files: relative imports only (no path aliases). Cross-tree imports under `registry-src/` are allowed (e.g. `../../../core/tokens/default.js`); the build script rewrites them to install-relative paths. Platform splits via `.web.tsx` / `.native.tsx`. No DOM-only globals in shared files.
+## Architecture
 
-## Manifest format
+```
+registry-src/
+├── core/                      # flavor-agnostic
+│   ├── primitives/            # (Phase 2+: pure-logic extraction)
+│   ├── tokens/                # types.ts (Theme contract) + default.ts (HSL values + space() helper)
+│   ├── variants/              # (Phase 2+: cva-like helper)
+│   └── web-ui/                # (Phase 2+: useWebUi for hover/focus/active on RN Web)
+└── styles/
+    ├── unistyles/             # current Unistyles flavor
+    │   ├── lib/               # unistyles.ts wiring + module augmentation
+    │   ├── primitives/        # portal, overlay, positioning, focus, roving-focus, scroll-lock, press, a11y
+    │   ├── ui/                # public catalog
+    │   └── items/             # per-item manifests (.manifest.json)
+    └── stylesheet/            # Phase 2+ skeleton (renumber pending)
+```
 
-Per-item manifest at `registry-src/styles/<style>/items/<name>.manifest.json`:
+**Three install layers** mirror the install order in a consumer:
+
+1. **Tokens & theme** — `core/tokens/` ships into the consumer's `lib/tokens/{types,default}.ts` along with the flavor's wiring file (`lib/unistyles.ts` for the Unistyles flavor). Consumer imports the wiring once at startup before any styled code runs.
+2. **Primitives** — `styles/<style>/primitives/`. Cross-platform building blocks; platform splits via `.web.tsx` / `.native.tsx`; shared types in `*.types.ts`.
+3. **UI components** — `styles/<style>/ui/`. Single-file shadcn-style `.tsx`.
+
+**Registry build pipeline:**
+
+- Each item is declared in `registry-src/styles/<style>/items/<name>.manifest.json`.
+- Manifest sources default to relative under the style's tree; prefix `core:` to read from `registry-src/core/`.
+- `scripts/build-registry.ts` discovers styles dynamically, embeds files, rewrites cross-tree imports to install-relative paths, validates against the registry-item schema, and emits per-style indexes + items.
+- Output: `public/v1/registry.json` (top-level index) + `public/v1/styles/<style>/{registry.json,r/*.json}`.
+
+Manifest example:
 
 ```json
 {
   "name": "button",
   "type": "registry:ui",
   "title": "Button",
-  "description": "...",
   "registryDependencies": ["tokens"],
   "files": [
     { "source": "ui/button.tsx", "path": "components/ui/button.tsx", "type": "registry:ui" },
@@ -76,19 +91,46 @@ Per-item manifest at `registry-src/styles/<style>/items/<name>.manifest.json`:
 }
 ```
 
-`source` is relative to the style's tree by default, or prefixed `core:` to read from `registry-src/core/`. `path` is the install destination in the consumer's project, kebab-case. The build script enforces both.
+Full protocol: `specs/registry-protocol.md`. Adding new flavors: `registry-src/styles/README.md`.
 
-See `specs/registry-protocol.md` for full details.
+## Critical conventions for `registry-src/**`
 
-## Testing guidelines
+This code ships verbatim into consumer apps.
 
-- Use the built-in `node:test` runner with `assert` as shown in `tests/`.
-- Name tests `*.test.ts` and keep them in `tests/`. They import from `registry-src/styles/unistyles/primitives/...` (today; some primitives may move to `core/primitives/` in Phase 1+).
-- Run `npm test` locally before opening a PR.
-- The test runner is headless; UI behavior is verified manually in a playground app (the user rebuilds it from scratch when needed).
+- **Unistyles v3 only** in the Unistyles flavor. Use `StyleSheet.create((theme) => ...)` + `styles.useVariants(...)`. The v2 API (`createStyleSheet`, `useStyles`) is forbidden.
+- **No path aliases** in installed files — consumers may have different alias configs. Use relative imports between registry files. Cross-tree imports under `registry-src/` are allowed (e.g. `../../../core/tokens/default.js`); the build script rewrites them to install-relative paths.
+- **Platform splits via filename**: `*.web.tsx` / `*.native.tsx`; shared types in `*.types.ts`. Avoid `Platform.OS` branching where a filename split works.
+- **No DOM-only globals** in shared (non-`.web`) files.
+- **File naming:** PascalCase for files exporting a single React component (e.g. `PortalHost.tsx`); kebab-case for utilities, stores, hooks, and catalog files in `ui/`.
+- **Installed paths in manifests must be kebab-case.** Source filenames may stay PascalCase; the manifest's `path` lands in the consumer kebab-cased.
+
+## Style and tooling
+
+- **Biome** (`biome.json`): 2-space indent, double quotes, trailing commas, semicolons as needed, automatic import organization. No ESLint or Prettier.
+- TypeScript strict with two configs: `tsconfig.node.json` (tooling/tests) + `tsconfig.registry.json` (registry sources). `bun run typecheck` runs both.
+
+## Testing
+
+Tests live in `tests/*.test.ts` using Node's built-in `node:test` + `node:assert` via the `tsx` loader. Headless logic only — no React renderer at the root. UI behavior is verified manually in a playground app (the user rebuilds it when needed).
 
 ## Commit and PR guidelines
 
-- Concise, imperative subjects scoped per logical step (e.g., `feat(phase-0): rewrite build script for multi-style`). Phase work commits include a `phase-N` scope so the history is bisectable per phase.
-- PR descriptions list the commands run (`lint`, `typecheck`, `test`, `build:registry`) and any relevant context.
-- If you modify `registry-src/` or `schemas/`, run `npm run build:registry` and commit the regenerated `public/` artifacts; CI fails if the working tree is dirty after the build.
+- Concise, imperative subjects scoped per logical step (e.g. `feat(phase-2): port button to stylesheet`). Phase work uses a `phase-N` scope so history is bisectable per phase.
+- PR descriptions list the commands run (`lint`, `typecheck`, `test`, `build:registry`) plus relevant context.
+- If you touch `registry-src/` or `schemas/`, run `bun run build:registry` and commit the regenerated `public/` artifacts. CI fails on a dirty tree.
+
+## Working with the user
+
+User writes in Argentine Spanish (voseo); reply in Spanish. Code, identifiers, file content, and commit messages stay in English.
+
+Once a spec is signed off, execute fully and fix breakages inline. If a decision isn't in the spec, stop and ask — don't pick a default.
+
+## Reference docs
+
+- `ROADMAP.md` — master milestone index. Read first to know what's active.
+- `SPEC.md` — mission, goals/non-goals, architectural rationale, versioning.
+- `specs/phase-0-restructure.md` — done; commit map in §18.
+- `specs/phase-2-stylesheet-foundations.md` — orphan skeleton (will renumber to Phase 3 when active).
+- `specs/component-catalog.md` — tier mapping + per-component `Status` (`ready` / `not-ready`).
+- `specs/registry-protocol.md` — manifest format, build pipeline, URL scheme.
+- `README.md` — consumer-facing install snippets.

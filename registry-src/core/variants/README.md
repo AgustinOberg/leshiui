@@ -2,7 +2,7 @@
 
 **`cva`-like variant helper for styling backends without built-in variants.**
 
-> **Status: Phase 0 placeholder.** Folder reserved. Implementation lands in Phase 1 when the StyleSheet flavor needs it. See `specs/phase-1-stylesheet-foundations.md`.
+> **Status: Phase 0 placeholder.** Folder reserved. Implementation lands in Phase 2 when the StyleSheet flavor needs it. See `specs/phase-2-stylesheet-foundations.md`.
 
 ## API contract (planned)
 
@@ -39,7 +39,7 @@ const styleArray = button({ variant: "outline", size: "lg" })
 
 Used by every flavor whose backend doesn't ship variants (StyleSheet today; future NativeWind, restyle-style; etc.). The Unistyles flavor doesn't use it — Unistyles has its own variant system embedded in `StyleSheet.create`.
 
-## Implementation constraints (for Phase 1)
+## Implementation constraints (for Phase 2)
 
 - **Zero dependencies.** No `cva`, no `tailwind-merge`. Plain TypeScript + RN style object merging.
 - **Strict types.** `VariantProps<typeof button>` extracts the union of valid variant inputs.

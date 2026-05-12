@@ -2,7 +2,7 @@
 
 **Single-hook helper for CSS pseudo-class behavior on RN Web.**
 
-> **Status: Phase 0 placeholder.** Folder reserved. Implementation lands in Phase 1, when the StyleSheet flavor's first components need hover / focus-visible / active states on web. See `specs/phase-1-stylesheet-foundations.md`.
+> **Status: Phase 0 placeholder.** Folder reserved. Implementation lands in Phase 2, when the StyleSheet flavor's first components need hover / focus-visible / active states on web. See `specs/phase-2-stylesheet-foundations.md`.
 
 ## API contract (planned)
 
@@ -30,7 +30,7 @@ The user (project owner) explicitly chose a single entry point over `useWebHover
 
 Any future flavor that doesn't have native pseudo-class support (StyleSheet today, hypothetical NativeWind flavor tomorrow, plain styled-components flavor later) needs the same primitive. Keeping it in `core/` lets all such flavors share one implementation. The Unistyles flavor doesn't import it — Unistyles' own web parser handles pseudos.
 
-## Implementation notes (for Phase 1)
+## Implementation notes (for Phase 2)
 
 - Native (`use-web-ui.native.ts`): return `undefined` or empty object.
 - Web (`use-web-ui.web.ts`): hash the input options, look up an existing class or inject a new one, return `{ $$css: true, [className]: className }` (RN Web's CSS-in-JS escape hatch) or equivalent.

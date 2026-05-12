@@ -2,7 +2,7 @@
 
 **Plain `StyleSheet` + Context-based theming flavor.**
 
-> **Status: Phase 0 skeleton — all subfolders empty.** Phase 1 implements the foundations (theme provider, useTheme hook, web-ui hook, variants helper) and ports Tier 1 components. See `specs/phase-1-stylesheet-foundations.md`.
+> **Status: Phase 0 skeleton — all subfolders empty.** Phase 2 implements the foundations (theme provider, useTheme hook, web-ui hook, variants helper) and ports Tier 1 components. See `specs/phase-2-stylesheet-foundations.md`.
 
 ## Why this flavor
 
@@ -16,10 +16,10 @@ The Unistyles flavor's hard requirements (`react-native-nitro-modules`, `react-n
 | Theme runtime | C++ JSI, zero re-render switches | React Context, re-renders on theme change |
 | Web pseudo-classes | built-in CSS injection | `core/web-ui` hook |
 | Variants | built-in (Unistyles `StyleSheet.create`) | `core/variants` helper |
-| Responsive / breakpoints | built-in | not in v1 (TODO recorded in Phase 1 spec) |
+| Responsive / breakpoints | built-in | not in v1 (TODO recorded in Phase 2 spec) |
 | Performance ceiling | higher | "good enough" for most apps |
 
-## Implementation plan (Phase 1)
+## Implementation plan (Phase 2)
 
 1. `lib/tokens.ts` — re-export from `core/tokens/default.ts` so manifests can ship a single `tokens` item that reads from core.
 2. `lib/theme-provider.tsx` — `<ThemeProvider value={...}>{children}</ThemeProvider>` + `useTheme()` hook.
