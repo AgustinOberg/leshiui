@@ -14,12 +14,12 @@ import { Platform } from "react-native"
  *   internally, so theme-typed text matches default `<Text>` text.
  */
 const sansFamily = Platform.select({
-  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"',
+  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", UI Emoji"',
   default: "System",
 }) as string
 
 const monoFamily = Platform.select({
-  web: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+  web: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation "Courier New", monospace',
   default: "Menlo",
 }) as string
 

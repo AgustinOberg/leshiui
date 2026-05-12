@@ -239,8 +239,14 @@ export const DialogContent = React.forwardRef<View, DialogContentProps>(
     },
     ref,
   ) => {
+    // Capture the full context value so we can re-provide it inside the
+    // Portal. Without this re-provider, every Dialog sub-component that
+    // calls useDialog() (DialogTitle, DialogDescription, DialogClose) would
+    // throw, because Portal teleports the subtree to PortalHost — which
+    // lives outside the Dialog provider in the React tree.
+    const dialogContext = useDialog()
     const { open, onOpenChange, contentRef, titleId, descriptionId, modal } =
-      useDialog()
+      dialogContext
 
     useScrollLock(open && modal)
     const variantStyles = styles.useVariants({
@@ -276,13 +282,14 @@ export const DialogContent = React.forwardRef<View, DialogContentProps>(
 
     return (
       <Portal>
-        <DismissLayer
-          onDismiss={handleDismiss}
-          dismissable={isDismissable}
-          scrim={modal}
-          scrimStyle={[styles.overlay, overlayStyle]}
-        >
-          <FocusScope trapped={modal} loop={true} style={styles.center}>
+        <DialogContext.Provider value={dialogContext}>
+          <DismissLayer
+            onDismiss={handleDismiss}
+            dismissable={isDismissable}
+            scrim={modal}
+            scrimStyle={[styles.overlay, overlayStyle]}
+          >
+            <FocusScope trapped={modal} loop={true} style={styles.center}>
             <View
               ref={setContentRef}
               role={Platform.OS === "web" ? "dialog" : undefined}
@@ -306,6 +313,7 @@ export const DialogContent = React.forwardRef<View, DialogContentProps>(
             </View>
           </FocusScope>
         </DismissLayer>
+        </DialogContext.Provider>
       </Portal>
     )
   },
