@@ -8,19 +8,21 @@ import { useServerUnistyles } from "react-native-unistyles"
 import "../lib/unistyles"
 
 /**
- * Root HTML wrapper for Expo Router's static web output.
+ * Root HTML wrapper.
  *
- * Inlined into the rendered `<head>`:
+ * The playground uses `expo.web.output = "single"` (SPA mode), so this file
+ * runs only for the initial document shell — there's no per-route SSR. Even
+ * so, Expo Router's bootstrap doesn't load `index.js` before it hydrates the
+ * root, so we import `../lib/unistyles` here too. That way
+ * `StyleSheet.configure` is called before the React tree mounts.
  *
- * - `<ScrollViewStyleReset />` resets the body so RN ScrollView measurements
- *   match the web's default.
- * - `useServerUnistyles({ includeRNWStyles: false })` emits the Unistyles
- *   SSR style tags and hydration payload. `includeRNWStyles: false` tells
- *   Unistyles not to duplicate the React Native Web stylesheet, which Expo
- *   Router already injects during export.
+ * `useServerUnistyles({ includeRNWStyles: true })` keeps the RN Web base
+ * stylesheet ordered before Unistyles classes; with SPA output Expo no longer
+ * appends its own duplicate stylesheet after Unistyles, so component styles
+ * (backgrounds, flex direction, etc.) win.
  */
 export default function Root({ children }: PropsWithChildren) {
-  const serverUnistyles = useServerUnistyles({ includeRNWStyles: false })
+  const serverUnistyles = useServerUnistyles({ includeRNWStyles: true })
 
   return (
     <html lang="en">
