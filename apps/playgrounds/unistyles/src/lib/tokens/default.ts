@@ -10,16 +10,24 @@ import { Platform } from "react-native"
  * shape:
  *
  * - native: the `"System"` keyword (mapped by RN to SF Pro / Roboto / etc.).
- * - web: a full CSS font stack identical to what React Native Web uses
- *   internally, so theme-typed text matches default `<Text>` text.
+ * - web: a CSS font stack matching what React Native Web emits for default
+ *   <Text>, so theme-typed text visually matches unstyled <Text>.
+ *
+ * The web stacks deliberately avoid quoted entries that contain another
+ * quoted entry as a substring (e.g. having both `"Segoe UI"` and
+ * `"Segoe UI Emoji"` simultaneously). Unistyles' web serializer mangles the
+ * second one when this happens — `"Segoe UI Emoji"` came out as `UI Emoji"`
+ * with an unclosed quote, invalidating the entire CSS value and forcing the
+ * browser to its serif default. Modern -apple-system / system-ui already
+ * renders emoji natively, so dropping the explicit emoji fallback is safe.
  */
 const sansFamily = Platform.select({
-  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", UI Emoji"',
+  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   default: "System",
 }) as string
 
 const monoFamily = Platform.select({
-  web: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation "Courier New", monospace',
+  web: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   default: "Menlo",
 }) as string
 
