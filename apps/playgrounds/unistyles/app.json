@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "unistyles",
-    "slug": "unistyles",
+    "name": "leshi-ui-playground-unistyles",
+    "slug": "leshi-ui-playground-unistyles",
     "version": "1.0.0",
     "newArchEnabled": true,
-    "scheme": "unistyles",
+    "scheme": "leshi-ui-playground-unistyles",
     "platforms": [
       "ios",
       "android",
@@ -35,14 +35,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.agustin.oberg.unistyles"
+      "bundleIdentifier": "com.agustin.oberg.leshiui.playground.unistyles"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.agustin.oberg.unistyles"
+      "package": "com.agustin.oberg.leshiui.playground.unistyles"
     }
   }
 }
