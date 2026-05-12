@@ -5,8 +5,16 @@ export type PortalNode = {
   node: ReactNode
 }
 
+/**
+ * Shared empty snapshot returned when a host has no mounted nodes. Reused
+ * across calls so `useSyncExternalStore` sees a stable reference and does not
+ * trigger an infinite render loop in React 18+.
+ */
+const EMPTY_SNAPSHOT: readonly PortalNode[] = Object.freeze([])
+
 export class PortalStore {
   private hosts = new Map<string, Map<number, ReactNode>>()
+  private snapshots = new Map<string, readonly PortalNode[]>()
   private listeners = new Set<() => void>()
 
   subscribe = (listener: () => void): (() => void) => {
@@ -16,13 +24,26 @@ export class PortalStore {
     }
   }
 
-  getSnapshot(name: string): PortalNode[] {
-    const host = this.hosts.get(name)
-    if (!host) {
-      return []
+  /**
+   * Return the current snapshot for a host. The reference is **stable** —
+   * the same array is returned on repeated calls until the host's content
+   * actually changes. This is required by `useSyncExternalStore`, which
+   * compares snapshots via `Object.is` and re-renders on any inequality.
+   */
+  getSnapshot(name: string): readonly PortalNode[] {
+    const cached = this.snapshots.get(name)
+    if (cached) {
+      return cached
     }
 
-    return Array.from(host.entries()).map(([key, node]) => ({ key, node }))
+    const host = this.hosts.get(name)
+    if (!host || host.size === 0) {
+      return EMPTY_SNAPSHOT
+    }
+
+    const fresh = this.computeSnapshot(host)
+    this.snapshots.set(name, fresh)
+    return fresh
   }
 
   mount(name: string, key: number, node: ReactNode): void {
@@ -32,6 +53,7 @@ export class PortalStore {
     host.set(key, node)
 
     if (!hadEntry || prev !== node) {
+      this.invalidateSnapshot(name)
       this.notify()
     }
   }
@@ -42,6 +64,7 @@ export class PortalStore {
 
     if (prev !== node) {
       host.set(key, node)
+      this.invalidateSnapshot(name)
       this.notify()
     }
   }
@@ -58,8 +81,19 @@ export class PortalStore {
     }
 
     if (removed) {
+      this.invalidateSnapshot(name)
       this.notify()
     }
+  }
+
+  private computeSnapshot(
+    host: Map<number, ReactNode>,
+  ): readonly PortalNode[] {
+    return Array.from(host.entries()).map(([key, node]) => ({ key, node }))
+  }
+
+  private invalidateSnapshot(name: string): void {
+    this.snapshots.delete(name)
   }
 
   private ensureHost(name: string): Map<number, ReactNode> {

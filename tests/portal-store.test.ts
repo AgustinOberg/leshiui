@@ -56,3 +56,31 @@ test("PortalStore notifies subscribers on changes only", () => {
 
   assert.strictEqual(calls, 3)
 })
+
+test("PortalStore returns a stable snapshot reference when content is unchanged", () => {
+  const store = new PortalStore()
+  const empty1 = store.getSnapshot("root")
+  const empty2 = store.getSnapshot("root")
+  assert.strictEqual(empty1, empty2, "empty snapshots must share a reference")
+
+  store.mount("root", 1, "Alpha")
+  const snap1 = store.getSnapshot("root")
+  const snap2 = store.getSnapshot("root")
+  assert.strictEqual(snap1, snap2, "non-empty snapshots must be stable across calls")
+
+  store.update("root", 1, "Alpha")
+  const snapAfterNoop = store.getSnapshot("root")
+  assert.strictEqual(
+    snapAfterNoop,
+    snap1,
+    "snapshot must not change when update is a no-op",
+  )
+
+  store.update("root", 1, "Alpha+")
+  const snapAfterChange = store.getSnapshot("root")
+  assert.notStrictEqual(
+    snapAfterChange,
+    snap1,
+    "snapshot must change when content changes",
+  )
+})
