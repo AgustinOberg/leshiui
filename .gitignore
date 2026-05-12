@@ -10,3 +10,6 @@ build/
 .cache/
 .turbo/
 *.tsbuildinfo
+
+# wrangler local state (deploy caches, dev artifacts)
+.wrangler/

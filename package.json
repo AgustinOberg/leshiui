@@ -12,7 +12,9 @@
     "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
     "typecheck:registry": "tsc -p tsconfig.registry.json --noEmit",
     "build:registry": "tsx scripts/build-registry.ts",
-    "test": "node --test --import tsx tests/**/*.test.ts"
+    "test": "node --test --import tsx tests/**/*.test.ts",
+    "deploy": "npm run build:registry && wrangler pages deploy public --project-name=leshi-ui --branch=main --commit-dirty=true",
+    "deploy:preview": "npm run build:registry && wrangler pages deploy public --project-name=leshi-ui --commit-dirty=true"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
@@ -27,6 +29,7 @@
     "react-native-svg": "^15.15.1",
     "react-native-unistyles": "^3.2.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.90.1"
   }
 }

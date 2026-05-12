@@ -53,6 +53,7 @@ Run from repo root:
 - `npm run typecheck` — runs `typecheck:node` (tooling) + `typecheck:registry` (registry sources).
 - `npm test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/portal-store.test.ts`.
 - `npm run build:registry` — runs `scripts/build-registry.ts`. Reads manifests, embeds files, validates against schema, writes to `public/`. **CI fails if the working tree is dirty afterwards** — commit regenerated artifacts whenever you touch `registry-src/` or `schemas/`.
+- `npm run deploy` — builds + pushes `public/` to Cloudflare Pages production (`leshi-ui.pages.dev`) via Wrangler. Auth is local to the maintainer's machine. `npm run deploy:preview` deploys to a one-off preview URL instead.
 
 ---
 

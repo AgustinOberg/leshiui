@@ -243,6 +243,17 @@ npx shadcn@latest add @leshi-ui/tokens @leshi-ui/button
 
 The component imports in your app code don't change — only the underlying styling implementation does.
 
+## Deploying the registry (maintainers)
+
+The registry is hosted on Cloudflare Pages at `leshi-ui.pages.dev`. Deploys are manual via Wrangler:
+
+```bash
+npm run deploy          # build registry + deploy to production (main branch)
+npm run deploy:preview  # build + deploy to a preview URL (no production replacement)
+```
+
+`wrangler` is bundled as a devDependency and authenticates against the maintainer's Cloudflare account on their local machine (no CI secret required). Each deploy captures the current git commit hash automatically — you can inspect or roll back from the Cloudflare dashboard.
+
 ## Project status and architecture
 
 - `SPEC.md` — high-level mission, architecture overview, coding philosophy.

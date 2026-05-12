@@ -42,6 +42,8 @@ The shared "recipe" (theme contract, eventually pure-logic primitives) lives in 
 - `npm run typecheck` — `tsc --noEmit` for both `tsconfig.node.json` and `tsconfig.registry.json`.
 - `npm run build:registry` — regenerate registry artifacts into `public/`. CI fails if the tree is dirty afterwards, so commit the regenerated output.
 - `npm test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/<file>.test.ts`.
+- `npm run deploy` — build `public/` and push to Cloudflare Pages production (`leshi-ui.pages.dev`) via `wrangler`. Authenticated against the project owner's Cloudflare account on the local machine; no CI secret required.
+- `npm run deploy:preview` — build and deploy to a one-off preview URL (no production replacement). Use to test a registry change without affecting live consumers.
 - Always run `npm run lint` and `npm run typecheck` after every change.
 
 ## Coding style and naming
