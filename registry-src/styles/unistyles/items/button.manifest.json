@@ -2,8 +2,8 @@
   "name": "button",
   "type": "registry:ui",
   "title": "Button",
-  "description": "Button component with variants and pressed/disabled/loading states.",
-  "registryDependencies": ["tokens"],
+  "description": "Accessible, theme-driven button mirroring shadcn/ui v4. 6 variants, 8 sizes, hover/focus-visible (web), tactile scale on native, loading + disabled states, asChild via Slot.",
+  "registryDependencies": ["tokens", "slot"],
   "files": [
     {
       "source": "ui/button.tsx",

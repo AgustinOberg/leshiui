@@ -8,6 +8,10 @@ Canonical instructions for any AI agent working on **Leshi UI**. Claude Code loa
 - **Phase 1** — TBD; spec not yet drafted. See `ROADMAP.md` for the full milestone list (Phases 1–8).
 - Don't start phase work before the active phase has a spec written and signed off.
 
+## Creating a new component
+
+See `specs/component-authoring.md` for the canonical 14-step workflow (shadcn-first design, HeroUI Native cross-check, spec-before-code, playground integration, Chrome verification). The rules in this file are binding; the workflow doc is *how* you apply them.
+
 ## What this repo is
 
 Leshi UI is a shadcn-style, source-distributed UI component library for React Native (iOS / Android / Web). It is **not** an npm package — it publishes a static **shadcn registry** that consumers install via `npx shadcn@latest add @leshi-ui/<item>`, copying source into their project.
@@ -133,4 +137,5 @@ Once a spec is signed off, execute fully and fix breakages inline. If a decision
 - `specs/phase-2-stylesheet-foundations.md` — orphan skeleton (will renumber to Phase 3 when active).
 - `specs/component-catalog.md` — tier mapping + per-component `Status` (`ready` / `not-ready`).
 - `specs/registry-protocol.md` — manifest format, build pipeline, URL scheme.
+- `specs/component-authoring.md` — 14-step workflow for creating components (shadcn-first, HeroUI Native cross-check, spec-before-code).
 - `README.md` — consumer-facing install snippets.

@@ -38,7 +38,7 @@ Required primitives (a component "needs" a primitive if its implementation impor
 | Badge | badge | not-ready | 1 | T | Pure presentational. |
 | Breadcrumb | breadcrumb | not-ready | 2 | T, K (web) | Web: links + aria-current; native: navigation integration left to consumer. |
 | Button Group | button-group | not-ready | 2 | T | Grouping + separators + consistent radii; optional roving focus on web. |
-| Button | button | ready | 1 | T | Pressed / disabled / loading variants; web focus-visible ring. |
+| Button | button | ready | 1 | T | shadcn v4 parity: 6 variants × 8 sizes, web hover + 3 px focus-visible ring, native scale-on-press, loading + disabled, `asChild` via Slot. |
 | Calendar | calendar | not-ready | 4 | T, K, RF | Web: rich keyboard nav; native: must decide grid impl + locale formatting. |
 | Card | card | not-ready | 1 | T | Pure presentational. |
 | Carousel | carousel | not-ready | 4 | T, G, K (web) | Native gestures; web arrow keys; snapping. |

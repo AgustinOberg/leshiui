@@ -6,10 +6,17 @@
       "name": "button",
       "type": "registry:ui",
       "title": "Button",
-      "description": "Button component with variants and pressed/disabled/loading states.",
+      "description": "Accessible, theme-driven button mirroring shadcn/ui v4. 6 variants, 8 sizes, hover/focus-visible (web), tactile scale on native, loading + disabled states, asChild via Slot.",
       "registryDependencies": [
-        "@leshi-ui/tokens"
+        "@leshi-ui/tokens",
+        "@leshi-ui/slot"
       ]
+    },
+    {
+      "name": "slot",
+      "type": "registry:lib",
+      "title": "Slot",
+      "description": "asChild primitive — clones a single child and merges props, refs, styles, and event handlers. Shared foundation for components that want to render as their child (e.g. Button asChild)."
     },
     {
       "name": "tokens",
