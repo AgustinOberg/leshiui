@@ -46,14 +46,15 @@ These rules apply to every change in this repo. Not negotiable.
 
 ## Common commands
 
-Run from repo root:
+**Package manager: Bun.** Use `bun` for everything in this repo. Never propose `npm`, `yarn`, or `pnpm` commands. Run from repo root:
 
-- `npm run lint` — Biome lint.
-- `npm run check` — Biome lint + format + import organization.
-- `npm run typecheck` — runs `typecheck:node` (tooling) + `typecheck:registry` (registry sources).
-- `npm test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/portal-store.test.ts`.
-- `npm run build:registry` — runs `scripts/build-registry.ts`. Reads manifests, embeds files, validates against schema, writes to `public/`. **CI fails if the working tree is dirty afterwards** — commit regenerated artifacts whenever you touch `registry-src/` or `schemas/`.
-- `npm run deploy` — builds + pushes `public/` to Cloudflare Pages production (`leshi-ui.pages.dev`) via Wrangler. Auth is local to the maintainer's machine. `npm run deploy:preview` deploys to a one-off preview URL instead.
+- `bun install` — install dependencies.
+- `bun run lint` — Biome lint.
+- `bun run check` — Biome lint + format + import organization.
+- `bun run typecheck` — runs `typecheck:node` (tooling) + `typecheck:registry` (registry sources).
+- `bun run test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/portal-store.test.ts`. (The test script uses `node` directly because the tests rely on the `node:test` API; Bun runs it without changes.)
+- `bun run build:registry` — runs `scripts/build-registry.ts`. Reads manifests, embeds files, validates against schema, writes to `public/`. **CI fails if the working tree is dirty afterwards** — commit regenerated artifacts whenever you touch `registry-src/` or `schemas/`.
+- `bun run deploy` — builds + pushes `public/` to Cloudflare Pages production (`leshi-ui.pages.dev`) via Wrangler. Auth is local to the maintainer's machine. `bun run deploy:preview` deploys to a one-off preview URL instead.
 
 ---
 

@@ -245,11 +245,14 @@ The component imports in your app code don't change — only the underlying styl
 
 ## Deploying the registry (maintainers)
 
+This repo uses **Bun** as its package manager and script runner. Install Bun first via [bun.sh](https://bun.sh) (or `curl -fsSL https://bun.sh/install | bash`). The lockfile is `bun.lock`.
+
 The registry is hosted on Cloudflare Pages at `leshi-ui.pages.dev`. Deploys are manual via Wrangler:
 
 ```bash
-npm run deploy          # build registry + deploy to production (main branch)
-npm run deploy:preview  # build + deploy to a preview URL (no production replacement)
+bun install                # one-time + when deps change
+bun run deploy             # build registry + deploy to production (main branch)
+bun run deploy:preview     # build + deploy to a preview URL (no production replacement)
 ```
 
 `wrangler` is bundled as a devDependency and authenticates against the maintainer's Cloudflare account on their local machine (no CI secret required). Each deploy captures the current git commit hash automatically — you can inspect or roll back from the Cloudflare dashboard.

@@ -8,14 +8,15 @@
     "lint": "biome lint .",
     "format": "biome format .",
     "check": "biome check .",
-    "typecheck": "npm run typecheck:node && npm run typecheck:registry",
+    "typecheck": "bun run typecheck:node && bun run typecheck:registry",
     "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
     "typecheck:registry": "tsc -p tsconfig.registry.json --noEmit",
     "build:registry": "tsx scripts/build-registry.ts",
     "test": "node --test --import tsx tests/**/*.test.ts",
-    "deploy": "npm run build:registry && wrangler pages deploy public --project-name=leshi-ui --branch=main --commit-dirty=true",
-    "deploy:preview": "npm run build:registry && wrangler pages deploy public --project-name=leshi-ui --commit-dirty=true"
+    "deploy": "bun run build:registry && wrangler pages deploy public --project-name=leshi-ui --branch=main --commit-dirty=true",
+    "deploy:preview": "bun run build:registry && wrangler pages deploy public --project-name=leshi-ui --commit-dirty=true"
   },
+  "packageManager": "bun@1.3.6",
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
     "@tanstack/react-form": "^1.27.7",

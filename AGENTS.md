@@ -35,16 +35,18 @@ The shared "recipe" (theme contract, eventually pure-logic primitives) lives in 
 
 ## Build, test, and development commands
 
-- `npm install` — install dependencies.
-- `npm run lint` — Biome lint.
-- `npm run format` — Biome format.
-- `npm run check` — Biome lint + format + import organization.
-- `npm run typecheck` — `tsc --noEmit` for both `tsconfig.node.json` and `tsconfig.registry.json`.
-- `npm run build:registry` — regenerate registry artifacts into `public/`. CI fails if the tree is dirty afterwards, so commit the regenerated output.
-- `npm test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/<file>.test.ts`.
-- `npm run deploy` — build `public/` and push to Cloudflare Pages production (`leshi-ui.pages.dev`) via `wrangler`. Authenticated against the project owner's Cloudflare account on the local machine; no CI secret required.
-- `npm run deploy:preview` — build and deploy to a one-off preview URL (no production replacement). Use to test a registry change without affecting live consumers.
-- Always run `npm run lint` and `npm run typecheck` after every change.
+**Package manager: Bun.** Install Bun via [bun.sh](https://bun.sh). Don't use `npm`, `yarn`, or `pnpm` for this project — every command and CI step assumes `bun`. The lockfile is `bun.lock`; `package-lock.json` is not regenerated.
+
+- `bun install` — install dependencies. `bun install --frozen-lockfile` in CI.
+- `bun run lint` — Biome lint.
+- `bun run format` — Biome format.
+- `bun run check` — Biome lint + format + import organization.
+- `bun run typecheck` — `tsc --noEmit` for both `tsconfig.node.json` and `tsconfig.registry.json`.
+- `bun run build:registry` — regenerate registry artifacts into `public/`. CI fails if the tree is dirty afterwards, so commit the regenerated output.
+- `bun run test` — `node --test --import tsx tests/**/*.test.ts`. Single test: `node --test --import tsx tests/<file>.test.ts`. The test script keeps `node` as the runner because tests use the `node:test` API; Bun invokes it without changes.
+- `bun run deploy` — build `public/` and push to Cloudflare Pages production (`leshi-ui.pages.dev`) via `wrangler`. Authenticated against the project owner's Cloudflare account on the local machine; no CI secret required.
+- `bun run deploy:preview` — build and deploy to a one-off preview URL (no production replacement). Use to test a registry change without affecting live consumers.
+- Always run `bun run lint` and `bun run typecheck` after every change.
 
 ## Coding style and naming
 
