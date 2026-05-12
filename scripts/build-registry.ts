@@ -397,21 +397,27 @@ function resolveSourcePath(source: string, styleDir: string): string {
 }
 
 /**
- * Build a map of every file in a manifest, keyed by its absolute source path
- * with all common extensions exhausted. The map's value is the file's install
- * path (the `path` field from the manifest, kebab-case).
+ * Build a map keyed by absolute source path, with every file declared by
+ * every manifest in a style (not just one). The value is the file's install
+ * path (kebab-case, from the manifest's `path` field).
  *
- * The map is used by the import rewriter to translate cross-tree relative
- * imports in source code into install-relative paths in the published item.
+ * Used by the import rewriter to translate any relative import — sibling,
+ * cross-tree (via `core:`), or cross-item (e.g., a UI component importing
+ * a primitive from another manifest) — into install-relative paths in the
+ * published item. Without this, components like Dialog that pull in Focus
+ * or Portal from a separate manifest would emit broken relative paths in
+ * their installed file.
  */
-function buildSourceMap(
-  manifest: Manifest,
+function buildStyleSourceMap(
+  manifests: Manifest[],
   styleDir: string,
 ): Map<string, string> {
   const map = new Map<string, string>()
-  for (const file of manifest.files) {
-    const absSource = resolveSourcePath(file.source, styleDir)
-    map.set(absSource, file.path)
+  for (const manifest of manifests) {
+    for (const file of manifest.files) {
+      const absSource = resolveSourcePath(file.source, styleDir)
+      map.set(absSource, file.path)
+    }
   }
   return map
 }
@@ -574,9 +580,8 @@ function stripExtensionFromExternalImports(
 async function buildRegistryItem(
   manifest: Manifest,
   styleDir: string,
+  styleSourceMap: Map<string, string>,
 ): Promise<RegistryItem> {
-  const sourceMap = buildSourceMap(manifest, styleDir)
-
   const files = await Promise.all(
     manifest.files.map(async (file) => {
       const sourcePath = resolveSourcePath(file.source, styleDir)
@@ -586,7 +591,7 @@ async function buildRegistryItem(
         sourceContent,
         sourcePath,
         file.path,
-        sourceMap,
+        styleSourceMap,
       )
       const cleaned = stripExtensionFromExternalImports(rewritten, sourcePath)
 
@@ -811,9 +816,14 @@ async function main() {
 
     manifests.sort((a, b) => a.name.localeCompare(b.name))
 
+    // Build a per-style source map covering every manifest's files. This is
+    // what makes cross-item imports resolve correctly (e.g., a UI component
+    // pulling Portal from a separate manifest sees the right install path).
+    const styleSourceMap = buildStyleSourceMap(manifests, styleDir)
+
     const items: RegistryItem[] = []
     for (const manifest of manifests) {
-      const item = await buildRegistryItem(manifest, styleDir)
+      const item = await buildRegistryItem(manifest, styleDir, styleSourceMap)
       const isValid = validateItem(item)
       assertValid(
         isValid,
