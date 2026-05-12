@@ -1,3 +1,28 @@
+import { Platform } from "react-native"
+
+/**
+ * Font family stacks.
+ *
+ * React Native's `"System"` keyword resolves to the platform default font on
+ * iOS / Android, but on React Native Web it gets passed through to CSS
+ * verbatim — and `font-family: System` is not a valid CSS font, so browsers
+ * fall back to their serif default. Each platform therefore picks the right
+ * shape:
+ *
+ * - native: the `"System"` keyword (mapped by RN to SF Pro / Roboto / etc.).
+ * - web: a full CSS font stack identical to what React Native Web uses
+ *   internally, so theme-typed text matches default `<Text>` text.
+ */
+const sansFamily = Platform.select({
+  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"',
+  default: "System",
+}) as string
+
+const monoFamily = Platform.select({
+  web: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+  default: "Menlo",
+}) as string
+
 /**
  * The core design tokens for Leshi UI.
  *
@@ -15,8 +40,8 @@ export const tokens = {
   /** Typography configuration: font families, sizes, line heights, weights. */
   typography: {
     families: {
-      sans: "System",
-      mono: "Menlo",
+      sans: sansFamily,
+      mono: monoFamily,
     },
     sizes: {
       xs: 12,
