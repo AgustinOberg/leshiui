@@ -113,7 +113,9 @@ function mergeStyle<T extends object>(
   return Object.assign({}, base, override)
 }
 
-export type DialogOverlayProps = ComponentProps<typeof DialogPrimitive.Overlay> & {
+export type DialogOverlayProps = ComponentProps<
+  typeof DialogPrimitive.Overlay
+> & {
   style?: StyleProp<ViewStyle>
 }
 
@@ -127,9 +129,7 @@ export const DialogOverlay = forwardRef<
       // scrolls; native uses `absolute` inside the portal (root-mounted, so
       // already viewport-sized).
       position:
-        Platform.OS === "web"
-          ? ("fixed" as ViewStyle["position"])
-          : "absolute",
+        Platform.OS === "web" ? ("fixed" as ViewStyle["position"]) : "absolute",
       top: 0,
       left: 0,
       right: 0,
@@ -149,7 +149,9 @@ export const DialogOverlay = forwardRef<
   )
 })
 
-export type DialogContentProps = ComponentProps<typeof DialogPrimitive.Content> & {
+export type DialogContentProps = ComponentProps<
+  typeof DialogPrimitive.Content
+> & {
   /** @default true */
   showCloseButton?: boolean
   style?: StyleProp<ViewStyle>
@@ -179,9 +181,7 @@ export const DialogContent = forwardRef<
       // Same `fixed` rationale as the overlay: stay glued to the viewport on
       // web regardless of underlying page scroll.
       position:
-        Platform.OS === "web"
-          ? ("fixed" as ViewStyle["position"])
-          : "absolute",
+        Platform.OS === "web" ? ("fixed" as ViewStyle["position"]) : "absolute",
       top: 0,
       left: 0,
       right: 0,
@@ -233,7 +233,10 @@ export const DialogContent = forwardRef<
         >
           {children}
           {showCloseButton ? (
-            <DialogContentCloseButton color={theme.colors.foreground} ringColor={theme.colors.ring} />
+            <DialogContentCloseButton
+              color={theme.colors.foreground}
+              ringColor={theme.colors.ring}
+            />
           ) : null}
         </AnimatedContentPrimitive>
       </View>
@@ -405,7 +408,9 @@ export const DialogTitle = forwardRef<
   )
 })
 
-export type DialogDescriptionProps = ComponentProps<typeof DialogPrimitive.Description> & {
+export type DialogDescriptionProps = ComponentProps<
+  typeof DialogPrimitive.Description
+> & {
   style?: StyleProp<TextStyle>
 }
 

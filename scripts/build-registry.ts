@@ -532,10 +532,7 @@ function rewriteImports(
       }
 
       // Compute install-relative path from our file to the target.
-      let rel = path.posix.relative(
-        fromInstallDir,
-        toPosixPath(match.install),
-      )
+      let rel = path.posix.relative(fromInstallDir, toPosixPath(match.install))
       rel = rel.replace(STRIP_TRAILING_EXTS, "")
       if (!rel.startsWith(".")) rel = `./${rel}`
 
@@ -567,10 +564,7 @@ function stripExtensionFromExternalImports(
     return `${prefix}${specifier.replace(/\.js$/, "")}${suffix}`
   }
 
-  return content.replace(
-    /(\bfrom\s+["'])(\.{1,2}\/[^"']+\.js)(["'])/g,
-    rewrite,
-  )
+  return content.replace(/(\bfrom\s+["'])(\.{1,2}\/[^"']+\.js)(["'])/g, rewrite)
 }
 
 // ---------------------------------------------------------------------------
@@ -634,7 +628,9 @@ async function discoverStyles(): Promise<string[]> {
     .sort((a, b) => a.localeCompare(b))
 }
 
-async function discoverManifestFiles(stylesItemsDir: string): Promise<string[]> {
+async function discoverManifestFiles(
+  stylesItemsDir: string,
+): Promise<string[]> {
   let entries: Dirent[]
   try {
     entries = (await readdir(stylesItemsDir, {
@@ -723,10 +719,7 @@ function logCrossStyleWarnings(bundles: StyleBundle[]): void {
 
   const itemsByStyle = new Map<string, Set<string>>()
   for (const bundle of bundles) {
-    itemsByStyle.set(
-      bundle.style,
-      new Set(bundle.manifests.map((m) => m.name)),
-    )
+    itemsByStyle.set(bundle.style, new Set(bundle.manifests.map((m) => m.name)))
   }
 
   const allItems = new Set<string>()

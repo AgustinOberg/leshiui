@@ -42,8 +42,11 @@ Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy). Repo: `
 **Package manager: Bun.** Never propose `npm`, `yarn`, or `pnpm` — every script and CI step assumes `bun`. The lockfile is `bun.lock`.
 
 - `bun install` — install deps.
-- `bun run lint` — Biome lint.
-- `bun run check` — Biome lint + format + import organization.
+- `bun run lint` — oxlint (linter only).
+- `bun run lint:fix` — oxlint with `--fix`.
+- `bun run format` — Biome format (write).
+- `bun run check` — Biome format + import organization (write) + `oxlint --fix`. Use this as the one-shot local fix command.
+- `bun run check:ci` — Biome check (no writes) + oxlint. CI-friendly; exits non-zero on issues.
 - `bun run typecheck` — runs `typecheck:node` (tooling) + `typecheck:registry` (registry sources).
 - `bun run test` — `node --test --import tsx tests/**/*.test.ts`. Single: `node --test --import tsx tests/<file>.test.ts`. The runner stays on `node` because tests use `node:test`; Bun invokes it unchanged.
 - `bun run build:registry` — embeds files into `public/`. **CI fails if the tree is dirty afterwards** — commit regenerated artifacts after touching `registry-src/` or `schemas/`.
@@ -109,7 +112,8 @@ This code ships verbatim into consumer apps.
 
 ## Style and tooling
 
-- **Biome** (`biome.json`): 2-space indent, double quotes, trailing commas, semicolons as needed, automatic import organization. No ESLint or Prettier.
+- **Linter: oxlint** (`.oxlintrc.json`). Mirrors the `react-native-unistyles` config: `correctness: error`, `suspicious: warn`, plugins `react` + `typescript`. `react/react-in-jsx-scope` is off (React 19 JSX transform). No ESLint.
+- **Formatter: Biome** (`biome.json`, linter disabled) — 2-space indent, double quotes, trailing commas, semicolons as needed, automatic import organization (`assist.organizeImports`). No Prettier.
 - TypeScript strict with two configs: `tsconfig.node.json` (tooling/tests) + `tsconfig.registry.json` (registry sources). `bun run typecheck` runs both.
 
 ## Testing

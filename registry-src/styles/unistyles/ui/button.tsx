@@ -1,3 +1,4 @@
+import { Slot } from "@rn-primitives/slot"
 import type * as React from "react"
 import { forwardRef, useMemo, useState } from "react"
 import {
@@ -11,7 +12,6 @@ import {
   type View,
   type ViewStyle,
 } from "react-native"
-import { Slot } from "@rn-primitives/slot"
 import { StyleSheet, useUnistyles } from "react-native-unistyles"
 
 export type ButtonVariant =
@@ -445,25 +445,25 @@ export const Button = forwardRef<ButtonRef, ButtonProps>(function Button(
       {...webDataProps}
       {...rest}
     >
-      {renderAsChild
-        ? (children as React.ReactElement)
-        : (
-            <>
-              {loading ? (
-                <ActivityIndicator color={spinnerColor} size="small" />
-              ) : startContent !== undefined ? (
-                startContent
-              ) : null}
-              {hasTextChild ? (
-                <Text style={[styles.label as TextStyle, textStyle]}>
-                  {children}
-                </Text>
-              ) : (
-                (children as React.ReactNode)
-              )}
-              {endContent !== undefined ? endContent : null}
-            </>
+      {renderAsChild ? (
+        (children as React.ReactElement)
+      ) : (
+        <>
+          {loading ? (
+            <ActivityIndicator color={spinnerColor} size="small" />
+          ) : startContent !== undefined ? (
+            startContent
+          ) : null}
+          {hasTextChild ? (
+            <Text style={[styles.label as TextStyle, textStyle]}>
+              {children}
+            </Text>
+          ) : (
+            (children as React.ReactNode)
           )}
+          {endContent !== undefined ? endContent : null}
+        </>
+      )}
     </Comp>
   )
 })
