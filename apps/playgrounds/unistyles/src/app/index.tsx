@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native-unistyles"
 
 type ComponentEntry = {
   name: string
-  slug: "button" | "card" | "dialog"
+  slug: "button" | "dialog"
   description: string
 }
 
@@ -13,12 +13,6 @@ const COMPONENTS: ComponentEntry[] = [
     name: "Button",
     slug: "button",
     description: "Pressable with variants, sizes, loading and disabled states.",
-  },
-  {
-    name: "Card",
-    slug: "card",
-    description:
-      "Container with composable header, title, description, content, and footer.",
   },
   {
     name: "Dialog",

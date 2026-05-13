@@ -23,7 +23,7 @@ The defining feature is **two interchangeable styling backends**, picked per con
 - **Unistyles flavor** (`registry-src/styles/unistyles/`) — uses `react-native-unistyles` v3. Current implementation.
 - **StyleSheet flavor** (`registry-src/styles/stylesheet/`) — plain `StyleSheet` + Context theming, zero native deps. Skeleton only.
 
-The shared "recipe" (theme contract, future pure-logic primitives) lives in `registry-src/core/`. Only the styling layer differs per flavor.
+The shared "recipe" (theme contract today; future pure-logic helpers like a `useWebUi` hook or cva-like variants helper when Phase 2/3 needs them) lives in `registry-src/core/`. Only the styling layer differs per flavor.
 
 Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy). Repo: `https://github.com/AgustinOberg/leshiui`.
 
@@ -31,10 +31,10 @@ Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy). Repo: `
 
 1. **Mirror shadcn first.** Look at how shadcn/ui implements a component (props, slot composition, naming, file shape) and port that to React Native. Don't invent APIs when shadcn already defines one. Document any platform deviation in TSDoc. Architecturally: the styled component is source-distributed; the primitive layer and icon library are **peer dependencies** the consumer installs — exactly as shadcn relates to Radix and lucide. See `specs/architecture/primitive-layer.md` and `specs/architecture/icon-system.md`.
 2. **Minimal dependencies.** No npm deps without explicit user approval. Reimplement small helpers in-tree. **Pre-approved peer deps** (do not re-ask to add these — but always declare in the item manifest's `dependencies` field when imported): `@rn-primitives/*` (default primitive layer, mirroring shadcn↔Radix), `@expo/vector-icons` (default icon library), `lucide-react-native` + `react-native-svg` (alternative icon library), `react-native-reanimated@^3` (animations). Bar otherwise: Unistyles only for that flavor, React/RN as peers. Form integrations (`form-rhf`, `form-tsf`) are opt-in items.
-3. **Single-file components.** Self-contained `.tsx` per component (composition + variants + types + exports). Split into hooks or sub-components only when genuinely unreadable. Cross-component logic goes in `primitives/`.
+3. **Single-file components.** Self-contained `.tsx` per component (composition + variants + types + exports). Split into hooks or sub-components only when genuinely unreadable. Cross-component behavior comes from the peer `@rn-primitives/*` packages; gap-filling shared logic goes in `registry-src/core/` (create the subdir when first needed).
 4. **Strict typing. No `any`.** Mirror shadcn's TS surface.
 5. **Performance and accessibility are non-negotiable.** Correct `accessibilityRole` / aria, keyboard support on web, screen reader support on native, no avoidable re-renders.
-6. **Reuse via primitives.** New cross-component logic belongs in the primitives layer, not duplicated.
+6. **Reuse via primitives.** Behavior, a11y, and composition come from `@rn-primitives/*` (peer deps). Only fork or extend into `registry-src/core/` when the upstream genuinely doesn't cover the case — see `specs/architecture/primitive-layer.md` §Custom primitives.
 7. **TSDoc on all exports.** Document *why* (purpose, lifecycle, platform caveats), not *what*. Components include `@example`.
 
 ## Commands
@@ -56,24 +56,21 @@ Always run `bun run lint` and `bun run typecheck` after every change.
 ```
 registry-src/
 ├── core/                      # flavor-agnostic
-│   ├── primitives/            # (Phase 2+: pure-logic extraction)
-│   ├── tokens/                # types.ts (Theme contract) + default.ts (HSL values + space() helper)
-│   ├── variants/              # (Phase 2+: cva-like helper)
-│   └── web-ui/                # (Phase 2+: useWebUi for hover/focus/active on RN Web)
+│   └── tokens/                # types.ts (Theme contract) + shadcn-default.ts (HSL values + space() helper)
 └── styles/
     ├── unistyles/             # current Unistyles flavor
     │   ├── lib/               # unistyles.ts wiring + module augmentation
-    │   ├── primitives/        # portal, overlay, positioning, focus, roving-focus, scroll-lock, press, a11y
-    │   ├── ui/                # public catalog
+    │   ├── ui/                # public catalog (single-file components)
     │   └── items/             # per-item manifests (.manifest.json)
-    └── stylesheet/            # Phase 2+ skeleton (renumber pending)
+    └── stylesheet/            # Phase 3 skeleton (alt flavor, not yet implemented)
 ```
 
-**Three install layers** mirror the install order in a consumer:
+Future `core/` subdirs (`primitives/`, `variants/`, `web-ui/`) get created when Phase 2/3 work actually introduces code that belongs there — empty placeholder folders are not kept in-tree.
 
-1. **Tokens & theme** — `core/tokens/` ships into the consumer's `lib/tokens/{types,default}.ts` along with the flavor's wiring file (`lib/unistyles.ts` for the Unistyles flavor). Consumer imports the wiring once at startup before any styled code runs.
-2. **Primitives** — `styles/<style>/primitives/`. Cross-platform building blocks; platform splits via `.web.tsx` / `.native.tsx`; shared types in `*.types.ts`.
-3. **UI components** — `styles/<style>/ui/`. Single-file shadcn-style `.tsx`.
+**Two install layers** in the consumer:
+
+1. **Tokens & theme** — `core/tokens/` ships into the consumer's `lib/tokens/{types,shadcn-default}.ts` along with the flavor's wiring file (`lib/unistyles.ts` for the Unistyles flavor). Consumer imports the wiring once at startup before any styled code runs.
+2. **UI components** — `styles/<style>/ui/`. Single-file shadcn-style `.tsx`. Behavior comes from peer `@rn-primitives/*`; nothing else is shipped from this repo's source.
 
 **Registry build pipeline:**
 
@@ -92,7 +89,7 @@ Manifest example:
   "registryDependencies": ["tokens"],
   "files": [
     { "source": "ui/button.tsx", "path": "components/ui/button.tsx", "type": "registry:ui" },
-    { "source": "core:tokens/default.ts", "path": "lib/tokens/default.ts", "type": "registry:lib" }
+    { "source": "core:tokens/shadcn-default.ts", "path": "lib/tokens/shadcn-default.ts", "type": "registry:lib" }
   ]
 }
 ```

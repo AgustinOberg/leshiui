@@ -1,5 +1,7 @@
 # Slot — implementation spec
 
+> **Status: superseded.** The hand-rolled in-tree Slot described here has been replaced by `@rn-primitives/slot` (peer dep). See `specs/architecture/primitive-layer.md` for the current model. This document is retained as historical design context only.
+
 ## Goal
 
 A flavor-agnostic, dependency-free `Slot` primitive that enables the **`asChild` pattern** across every Leshi UI component. Mirrors Radix UI's `<Slot>` (web) and the rn-primitives port (RN), adapted to our conventions: single file, no path aliases, no npm deps, no `className` (we don't ship Tailwind).

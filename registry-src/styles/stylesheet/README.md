@@ -21,10 +21,11 @@ The Unistyles flavor's hard requirements (`react-native-nitro-modules`, `react-n
 
 ## Implementation plan (Phase 2)
 
-1. `lib/tokens.ts` — re-export from `core/tokens/default.ts` so manifests can ship a single `tokens` item that reads from core.
+1. `lib/tokens.ts` — re-export from `core/tokens/shadcn-default.ts` so manifests can ship a single `tokens` item that reads from core.
 2. `lib/theme-provider.tsx` — `<ThemeProvider value={...}>{children}</ThemeProvider>` + `useTheme()` hook.
 3. `lib/use-color-scheme.ts` — wrap `useColorScheme()` from RN, expose with override capability.
-4. Port Tier 1 components (`button`, `input`, `card`, `badge`, `alert`, `separator`, `avatar`, etc.) from `styles/unistyles/ui/` patterns, swapping Unistyles `StyleSheet.create((theme) => ...)` for plain `StyleSheet.create` + `useTheme()` consumption + `useWebUi()` for hover/focus on web.
-5. Reuse pure-logic primitives from `core/primitives/` (extracting them as needed; see `core/primitives/README.md` for the candidate list).
+4. Create `core/web-ui/` with the `useWebUi({ hover, focus, active })` hook (web injects CSS, native no-op) and `core/variants/` with the cva-like helper. Both folders are created when this work starts — they don't exist as empty placeholders.
+5. Port Tier 1 components (`button`, `input`, `card`, `badge`, `alert`, `separator`, `avatar`, etc.) from `styles/unistyles/ui/` patterns, swapping Unistyles `StyleSheet.create((theme) => ...)` for plain `StyleSheet.create` + `useTheme()` consumption + `useWebUi()` for hover/focus on web.
+6. If a Tier 1 component needs shared pure-logic that the upstream `@rn-primitives/*` peer dep doesn't cover, extract it into a new `core/primitives/<name>/` folder (created on demand — see `specs/architecture/primitive-layer.md` §Custom primitives).
 
 Until any of this lands, this folder is intentionally empty so the build script's auto-discovery doesn't emit a phantom registry for an empty flavor.

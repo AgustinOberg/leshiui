@@ -25,7 +25,6 @@ export default function RootLayout() {
           options={{ title: "Leshi UI Playground" }}
         />
         <Stack.Screen name="components/button" options={{ title: "Button" }} />
-        <Stack.Screen name="components/card" options={{ title: "Card" }} />
         <Stack.Screen
           name="components/dialog"
           options={{ title: "Dialog" }}

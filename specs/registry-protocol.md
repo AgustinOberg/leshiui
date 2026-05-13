@@ -130,9 +130,9 @@ Path-based: `/v1/...` everywhere. When a breaking change to the URL scheme or ma
 
 ## When adding a new style (future)
 
-1. Create `registry-src/styles/<new-style>/{lib,primitives,ui,items}/`.
+1. Create `registry-src/styles/<new-style>/{lib,ui,items}/`. Add `primitives/` only if/when the flavor actually ships a custom in-tree primitive (`@rn-primitives/*` is the default primitive layer).
 2. Implement the flavor's theme wiring and at least one item to validate the build.
-3. Run `npm run build:registry` — the script auto-discovers the new style.
+3. Run `bun run build:registry` — the script auto-discovers the new style.
 4. Output appears at `public/v1/styles/<new-style>/...`.
 5. Document the new style and its trade-offs in `styles/<new-style>/README.md` and update consumer `components.json` examples in `README.md`.
 

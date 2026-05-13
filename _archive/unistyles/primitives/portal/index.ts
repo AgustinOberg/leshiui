@@ -1,6 +1,0 @@
-export type { PortalProps } from "./Portal.js"
-export { Portal } from "./Portal.js"
-export type { PortalHostProps } from "./PortalHost.js"
-export { PortalHost } from "./PortalHost.js"
-export type { PortalProviderProps } from "./PortalProvider.js"
-export { PortalProvider } from "./PortalProvider.js"

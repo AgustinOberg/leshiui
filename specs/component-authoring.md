@@ -32,7 +32,7 @@ If shadcn doesn't have the component (some are RN-specific), fall back to HeroUI
 Components must not leak Unistyles-specific abstractions into their public API. Inside the body you use whatever the active flavor provides (`StyleSheet.create((theme) => ...)` + `useVariants` for Unistyles). But:
 
 - **Props the consumer sees** are identical across flavors.
-- **Shared logic** (variant maps, state machines, positioning math, focus traps) that doesn't depend on a styling system **belongs in `registry-src/core/primitives/` or `registry-src/core/variants/`** and is imported by each flavor file. (Today both dirs are empty; bootstrapping one is fine.)
+- **Shared logic** (variant maps, state machines, positioning math, focus traps) that doesn't depend on a styling system **belongs in `registry-src/core/primitives/` or `registry-src/core/variants/`** and is imported by each flavor file. Neither folder exists today — create it the moment you have a real file to put inside, never as an empty placeholder.
 - **Theme tokens** live in `registry-src/core/tokens/` and are imported the same way by every flavor.
 
 ### Single source of truth per flavor
@@ -168,8 +168,6 @@ Run continuously while editing:
 - `bun run build:registry` (every time you touch a manifest or registry source)
 
 **Zero TypeScript errors, zero lint errors, zero hardcoded theme values.** The bar is shadcn-perfect.
-
-When a similar component already exists in `_archive/unistyles/`, it's a useful **starting reference** — but never trust it blindly. Archived files predate the current rules; many use Unistyles v2 patterns or hardcoded values. Verify every line against the current standards.
 
 ### 10 · Ask the dev to start the playground
 
@@ -341,7 +339,6 @@ The bar: someone reading the code without the spec should still be able to follo
 - Skipping the spec and jumping to implementation.
 - Marking ready without verifying in Chrome.
 - Implementing in only one flavor when more than one is live.
-- Trusting `_archive/` files blindly — they may carry obsolete patterns.
 - Declaring a `default` key inside a Unistyles `variants` map — base styles are the implicit default; declaring `default` poisons compound-variant matching.
 
 ---
@@ -354,7 +351,6 @@ The bar: someone reading the code without the spec should still be able to follo
 - `specs/architecture/icon-system.md` — `<IconSlot>` placeholder + ts-morph transform, default `@expo/vector-icons`, alt `lucide-react-native`.
 - `specs/registry-protocol.md` — manifest format + build pipeline.
 - `specs/component-catalog.md` — tier mapping + per-component status.
-- `_archive/unistyles/` — prior implementations of every component. **Reference only**, not authoritative.
 - shadcn/ui — https://ui.shadcn.com · https://github.com/shadcn-ui/ui
 - `@rn-primitives` — https://rn-primitives.vercel.app · https://github.com/roninoss/rn-primitives (default primitive layer).
 - HeroUI Native — https://heroui.com/docs/native · https://heroui.com/native/llms.txt (mobile UX consultant only — never copy their primitive architecture; they hand-roll without a focus trap on web).

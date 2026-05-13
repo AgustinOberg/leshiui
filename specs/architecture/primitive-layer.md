@@ -49,17 +49,19 @@ This separation is what lets shadcn ship dozens of accessible components in a fe
 
 ## What this replaces
 
-| Today | Tomorrow |
+Previous iterations of this repo (now deleted) hand-rolled `portal`, `overlay`, `focus`, `roving-focus`, `scroll-lock`, `press`, and `a11y` primitives in-tree. All of that is gone; the peer-dep model below replaces it.
+
+| Previously in-tree | Now |
 | --- | --- |
-| `registry-src/core/primitives/slot/slot.tsx` | `@rn-primitives/slot` (peer dep on every item that ships `asChild`). |
-| Archived `_archive/unistyles/primitives/portal/*` | `@rn-primitives/portal` (peer dep). |
-| Archived `_archive/unistyles/primitives/overlay/*` | Per-component Overlay export from `@rn-primitives/<component>`. |
-| Archived `_archive/unistyles/primitives/focus/*` | Built into `@rn-primitives/dialog` web variant via Radix; native variant has no focus trap (acceptable for v1). |
-| Archived `_archive/unistyles/primitives/scroll-lock/*` | Built into web variant via Radix; native is a no-op (RN has no document scroll). |
+| Hand-rolled `slot` | `@rn-primitives/slot` (peer dep on every item that ships `asChild`). |
+| Hand-rolled `portal` | `@rn-primitives/portal` (peer dep). |
+| Hand-rolled `overlay` | Per-component Overlay export from `@rn-primitives/<component>`. |
+| Hand-rolled `focus` trap | Built into `@rn-primitives/dialog` web variant via Radix; native variant has no focus trap (acceptable for v1). |
+| Hand-rolled `scroll-lock` | Built into web variant via Radix; native is a no-op (RN has no document scroll). |
 
 ## Custom primitives (when we still write our own)
 
-Keep `registry-src/core/primitives/` for **cross-component logic that `@rn-primitives` doesn't supply** and that we don't want duplicated:
+`registry-src/core/primitives/` does **not** exist today — it gets created the moment a real file lands inside it. Reserved for **cross-component logic that `@rn-primitives` doesn't supply** and that we don't want duplicated:
 
 - Theme-aware helpers (e.g., a hook that returns the current breakpoint from Unistyles `rt`).
 - Web-only `useWebUi` hover/focus/active visibility (Phase 2 task already on the roadmap).
@@ -100,20 +102,18 @@ Convention going forward:
 
 **Pinning policy:** declare peer ranges as `^<latest-minor>`. `@rn-primitives/*` releases its family in lockstep, so consumers see version coherence in their lockfile.
 
-## Migration plan (Slot / Button)
+## Migration recipe (when porting a hand-rolled primitive to `@rn-primitives`)
 
-The current Slot lives at `registry-src/core/primitives/slot/slot.tsx` and is imported by `registry-src/styles/unistyles/ui/button.tsx`. Migration steps:
+Button already follows this pattern (`Slot` imported from `@rn-primitives/slot`, declared in the item's `dependencies`). When porting any future component whose hand-rolled behavior is now covered by `@rn-primitives`:
 
-1. **Delete** `registry-src/core/primitives/slot/` and `registry-src/styles/unistyles/items/slot.manifest.json`. The item disappears from the registry.
-2. **Rewrite** `button.tsx` to import from `@rn-primitives/slot` instead of the relative path. Behavior is byte-identical (the upstream API matches our hand-rolled one).
-3. **Update** `button.manifest.json`:
-   - Remove `registryDependencies: ["slot"]` if present.
-   - Add `dependencies: ["@rn-primitives/slot"]`.
-4. **Bump** Button's docs entry in `specs/component-catalog.md` only if behavior changes (it shouldn't).
+1. **Delete** any in-tree custom primitive folder (e.g., `registry-src/core/primitives/<name>/`) and its standalone manifest if one exists.
+2. **Rewrite** the consuming component to import from `@rn-primitives/<name>` instead of the relative path. Behavior should be byte-identical (the upstream API matches Radix).
+3. **Update** the component's manifest:
+   - Remove `registryDependencies: ["<name>"]` if present.
+   - Add `dependencies: ["@rn-primitives/<name>"]`.
+4. **Bump** the component's status in `specs/component-catalog.md` only if behavior changes.
 5. **Regenerate** `public/v1/` via `bun run build:registry`.
-6. **Update** playground app: `apps/playgrounds/unistyles/src/components/ui/button.tsx` and add `@rn-primitives/slot` to the playground's `package.json`.
-
-The same migration recipe applies to any future component whose hand-rolled behavior is now in `@rn-primitives`.
+6. **Update** the playground app: import from the peer dep and declare it in the playground's `package.json`.
 
 ## Per-flavor implications
 

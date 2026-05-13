@@ -15,7 +15,7 @@ In:
 - `core/variants/`: implement the cva-like helper.
 - Port the **Tier 1 catalog** (per `specs/component-catalog.md` Appendix B) to `styles/stylesheet/ui/`, with manifests in `styles/stylesheet/items/`.
 - Possibly: extract one or two flavor-agnostic primitives to `core/primitives/` if Tier 1 components reuse them across flavors (e.g., `press`, `a11y`).
-- Rebuild a playground app under `apps/expo-app/` that switches between flavors via a build flag or two parallel apps. User leads this.
+- Add a stylesheet playground app under `apps/playgrounds/stylesheet/` (mirroring the existing `apps/playgrounds/unistyles/`). User leads this.
 - Update consumer docs to show the `style: "stylesheet"` install path.
 
 Out:
@@ -34,7 +34,7 @@ These are not blocking Phase 1; surface them before starting Phase 2:
 2. **Color scheme listener performance.** Re-render-on-theme-change is unavoidable in Context; the question is granularity. Use a single `<ThemeProvider>` at root or a `useThemeValue(selector)` pattern with a subscription store? Recommendation: simple Context for v1; revisit if profiling shows a problem.
 3. **Variants helper memoization.** Stable references matter for `Pressable`'s `style` callback (which can re-run on every press). Memoize on input identity or use an LRU cache?
 4. **Tier 1 catalog scope.** Per `specs/component-catalog.md` Appendix B, Tier 1 is button + input + textarea + card + badge + alert + separator + avatar + skeleton + spinner + progress + empty + aspect-ratio + kbd + typography. ~15 components. All in v1 of Phase 2, or split into 2a / 2b?
-5. **Playground strategy.** One app with a switch (env var picks `style`), or two parallel apps `apps/expo-app-unistyles/` + `apps/expo-app-stylesheet/`? User had originally preferred two parallel apps.
+5. **Playground strategy.** One app with a switch (env var picks `style`), or two parallel apps `apps/playgrounds/unistyles/` + `apps/playgrounds/stylesheet/`? Current state has only the Unistyles playground; user had originally preferred two parallel apps.
 6. **Form integrations (`form-rhf`, `form-tsf`).** Port to StyleSheet in Phase 2 or leave as Unistyles-only and revisit later? Both keep the consumer's choice of form library a separate decision.
 
 ## Pre-flight (must hold before starting Phase 2)
