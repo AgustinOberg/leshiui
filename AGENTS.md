@@ -12,6 +12,8 @@ Canonical instructions for any AI agent working on **Leshi UI**. Claude Code loa
 
 See `specs/component-authoring.md` for the canonical 14-step workflow (shadcn-first design, HeroUI Native cross-check, spec-before-code, playground integration, Chrome verification). The rules in this file are binding; the workflow doc is *how* you apply them.
 
+Claude Code: invoke the `component-authoring` project skill (`.claude/skills/component-authoring/SKILL.md`) before touching code — it loads the compact contract derived from this file and from `specs/component-authoring.md`.
+
 ## What this repo is
 
 Leshi UI is a shadcn-style, source-distributed UI component library for React Native (iOS / Android / Web). It is **not** an npm package — it publishes a static **shadcn registry** that consumers install via `npx shadcn@latest add @leshi-ui/<item>`, copying source into their project.
@@ -27,8 +29,8 @@ Hosting: `https://leshi-ui.pages.dev` (Cloudflare Pages, manual deploy). Repo: `
 
 ## Hard rules (binding)
 
-1. **Mirror shadcn first.** Look at how shadcn/ui implements a component (props, slot composition, naming, file shape) and port that to React Native. Don't invent APIs when shadcn already defines one. Document any platform deviation in TSDoc.
-2. **Minimal dependencies.** No npm deps without explicit user approval. Reimplement small helpers in-tree. Bar: Unistyles only for that flavor, React/RN as peers. Form integrations (`form-rhf`, `form-tsf`) are opt-in items.
+1. **Mirror shadcn first.** Look at how shadcn/ui implements a component (props, slot composition, naming, file shape) and port that to React Native. Don't invent APIs when shadcn already defines one. Document any platform deviation in TSDoc. Architecturally: the styled component is source-distributed; the primitive layer and icon library are **peer dependencies** the consumer installs — exactly as shadcn relates to Radix and lucide. See `specs/architecture/primitive-layer.md` and `specs/architecture/icon-system.md`.
+2. **Minimal dependencies.** No npm deps without explicit user approval. Reimplement small helpers in-tree. **Pre-approved peer deps** (do not re-ask to add these — but always declare in the item manifest's `dependencies` field when imported): `@rn-primitives/*` (default primitive layer, mirroring shadcn↔Radix), `@expo/vector-icons` (default icon library), `lucide-react-native` + `react-native-svg` (alternative icon library), `react-native-reanimated@^3` (animations). Bar otherwise: Unistyles only for that flavor, React/RN as peers. Form integrations (`form-rhf`, `form-tsf`) are opt-in items.
 3. **Single-file components.** Self-contained `.tsx` per component (composition + variants + types + exports). Split into hooks or sub-components only when genuinely unreadable. Cross-component logic goes in `primitives/`.
 4. **Strict typing. No `any`.** Mirror shadcn's TS surface.
 5. **Performance and accessibility are non-negotiable.** Correct `accessibilityRole` / aria, keyboard support on web, screen reader support on native, no avoidable re-renders.

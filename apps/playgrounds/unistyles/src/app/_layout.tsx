@@ -1,14 +1,13 @@
+import { PortalHost } from "@rn-primitives/portal"
 import { Stack } from "expo-router"
 import { StatusBar } from "expo-status-bar"
 import { useUnistyles } from "react-native-unistyles"
-
-import { PortalHost, PortalProvider } from "@/lib/portal"
 
 export default function RootLayout() {
   const { theme } = useUnistyles()
 
   return (
-    <PortalProvider>
+    <>
       <StatusBar style="auto" />
       <Stack
         screenOptions={{
@@ -33,6 +32,6 @@ export default function RootLayout() {
         />
       </Stack>
       <PortalHost />
-    </PortalProvider>
+    </>
   )
 }

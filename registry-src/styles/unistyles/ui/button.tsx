@@ -11,8 +11,8 @@ import {
   type View,
   type ViewStyle,
 } from "react-native"
+import { Slot } from "@rn-primitives/slot"
 import { StyleSheet, useUnistyles } from "react-native-unistyles"
-import { Slot } from "../../../core/primitives/slot/slot.js"
 
 export type ButtonVariant =
   | "default"

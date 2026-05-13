@@ -50,7 +50,7 @@ Required primitives (a component "needs" a primitive if its implementation impor
 | Context Menu | context-menu | not-ready | 3 | T, P, O, Pos, RF, K (web) | Web: right-click + keyboard. Native: long-press trigger. |
 | Data Table | data-table | not-ready | 4 | T, V, K (web) | Web-first features. Native: list / grid approximation. |
 | Date Picker | date-picker | not-ready | 4 | T, P, O, Pos, K, RF | Native: platform picker or custom; web: calendar + input. |
-| Dialog | dialog | not-ready | 3 | T, P, O, F, K | Focus trap / restore on web; scroll lock. |
+| Dialog | dialog | ready | 3 | T, P, O, F, K | shadcn v4 parity: 10 exports, `@rn-primitives/dialog` peer (Radix on web → focus trap + scroll lock + ESC; native → BackHandler + accessibilityViewIsModal), close X via `@expo/vector-icons` Feather, subtle shadow. **Animations TBD** — Reanimated `asChild` + Radix slot merging drops styles; revisit in a follow-up. |
 | Drawer | drawer | not-ready | 3 | T, P, O, G, K (web) | Native pan gestures; web: slide-in + focus management. |
 | Dropdown Menu | dropdown-menu | not-ready | 3 | T, P, O, Pos, RF, K | Web semantics. Native: press trigger. |
 | Empty | empty | not-ready | 1 | T | Empty-state component; content slots. |

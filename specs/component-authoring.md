@@ -39,6 +39,25 @@ Components must not leak Unistyles-specific abstractions into their public API. 
 
 One `.tsx` per component per flavor. Composition + variants + types + exports live in that single file. Split into hooks or sub-components only when the file becomes genuinely unreadable. Cross-component logic goes into `core/primitives/`.
 
+### Architectural building blocks (read before designing the API)
+
+Leshi UI mirrors **shadcn/ui's distribution and dependency model 1:1**: the styled component is source-distributed, every other moving part is a peer dependency the consumer installs. Two architectural docs are binding for every component:
+
+- **`specs/architecture/primitive-layer.md`** — what plays the role of Radix. Default: **`@rn-primitives/*`** (peer dep model, same shape as shadcn↔Radix). When your component needs portal / overlay / focus trap / keyboard / controllable open state, import from `@rn-primitives/<x>` and add it to the manifest's `dependencies` field. **Do not hand-roll behavior `@rn-primitives` already ships.** A future Phase will add the ability to swap primitive libs (mirroring shadcn's Radix ↔ Base UI swap via `components.json` `style`) — design your component so the primitive import is the only line that would change.
+
+- **`specs/architecture/icon-system.md`** — what plays the role of lucide. Default: **`@expo/vector-icons`** (Feather set for most glyphs). When your component renders an icon, use the `<IconSlot lucide="<Name>" expoVectorIcons="<Set>:<name>" size={N} />` placeholder; the registry build emits per-library variants. Authoring rule: every `<IconSlot>` must declare every supported library prop — build fails otherwise.
+
+**Pre-approved peer dependencies** (already cleared with the maintainer; do not re-ask in step 4 to add these — but always list them in the manifest's `dependencies` when you import them):
+
+- `@rn-primitives/*` — primitive layer (any package in the family).
+- `@expo/vector-icons` — default icon library.
+- `lucide-react-native` (+ `react-native-svg` peer) — alternative icon library.
+- `react-native-reanimated@^3` — animations.
+
+Anything else still requires explicit user approval per AGENTS.md Hard Rule #2.
+
+**Where custom `core/primitives/` code still belongs:** theme-aware helpers (e.g., reading the current breakpoint from Unistyles `rt`), `useWebUi` hover/focus/active visibility, cva-like variant helper, gap-fillers that `@rn-primitives` doesn't ship (rare). Never re-implement a primitive the upstream already covers.
+
 ---
 
 ## The workflow (14 steps)
@@ -69,6 +88,10 @@ If HeroUI Native doesn't ship the component, fall back to shadcn entirely.
 ### 3 · Lock the code interface
 
 Default to **shadcn's exports and props**. The industry standard wins unless we have a strong, explicit reason to diverge. Any divergence must be documented in the spec and approved in step 8.
+
+Identify the **`@rn-primitives` package** that backs this component (if any). Verify the upstream API matches what shadcn / Radix exposes — they almost always do, since `@rn-primitives` is shaped after Radix. Note any gaps (e.g., native side missing focus trap) and decide in the spec whether to ship anyway, wrap, or fork into `core/primitives/`.
+
+Identify the **icon glyphs** the component needs. Map each glyph to the supported icon libraries (today: `lucide` name + `@expo/vector-icons` `Set:name`). Include the mapping in the spec.
 
 ### 4 · Surface open questions
 
@@ -133,9 +156,9 @@ Do not proceed without explicit go-ahead.
 
 When approved, write:
 
-- `registry-src/styles/<flavor>/ui/<name>.tsx` (per active flavor — today, `unistyles`).
-- `registry-src/styles/<flavor>/items/<name>.manifest.json` (paths kebab-case, `registryDependencies` complete).
-- Any new primitives under `registry-src/core/primitives/` or `registry-src/styles/<flavor>/primitives/` per the spec.
+- `registry-src/styles/<flavor>/ui/<name>.tsx` (per active flavor — today, `unistyles`). Import behavior from `@rn-primitives/<x>` where applicable; render icons via `<IconSlot ...>` placeholder. Never re-implement portal / overlay / focus trap / keyboard semantics if the primitive already ships them.
+- `registry-src/styles/<flavor>/items/<name>.manifest.json` (paths kebab-case, `registryDependencies` complete, `dependencies` listing every npm peer the consumer must install — including transitive primitives like `@rn-primitives/portal` for honesty, and the chosen icon library).
+- Any new **gap-filling** primitives under `registry-src/core/primitives/` per the spec (only when `@rn-primitives` doesn't ship the behavior).
 - Any new theme tokens in `registry-src/core/tokens/` if the spec calls for them.
 
 Run continuously while editing:
@@ -327,8 +350,11 @@ The bar: someone reading the code without the spec should still be able to follo
 
 - `AGENTS.md` — binding hard rules.
 - `SPEC.md` — mission, goals/non-goals, versioning.
+- `specs/architecture/primitive-layer.md` — `@rn-primitives` adoption, peer-dep model, future swap mechanism (mirror shadcn ↔ Radix/Base UI).
+- `specs/architecture/icon-system.md` — `<IconSlot>` placeholder + ts-morph transform, default `@expo/vector-icons`, alt `lucide-react-native`.
 - `specs/registry-protocol.md` — manifest format + build pipeline.
 - `specs/component-catalog.md` — tier mapping + per-component status.
 - `_archive/unistyles/` — prior implementations of every component. **Reference only**, not authoritative.
 - shadcn/ui — https://ui.shadcn.com · https://github.com/shadcn-ui/ui
-- HeroUI Native — https://heroui.com/docs/native · https://heroui.com/native/llms.txt
+- `@rn-primitives` — https://rn-primitives.vercel.app · https://github.com/roninoss/rn-primitives (default primitive layer).
+- HeroUI Native — https://heroui.com/docs/native · https://heroui.com/native/llms.txt (mobile UX consultant only — never copy their primitive architecture; they hand-roll without a focus trap on web).

@@ -3,7 +3,8 @@
   "type": "registry:ui",
   "title": "Button",
   "description": "Accessible, theme-driven button mirroring shadcn/ui v4. 6 variants, 8 sizes, hover/focus-visible (web), tactile scale on native, loading + disabled states, asChild via Slot.",
-  "registryDependencies": ["tokens", "slot"],
+  "registryDependencies": ["tokens"],
+  "dependencies": ["@rn-primitives/slot"],
   "files": [
     {
       "source": "ui/button.tsx",

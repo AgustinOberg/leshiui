@@ -1,0 +1,20 @@
+{
+  "name": "dialog",
+  "type": "registry:ui",
+  "title": "Dialog",
+  "description": "Modal dialog mirroring shadcn/ui v4. Thin Unistyles wrapper over @rn-primitives/dialog (Radix on web → focus trap + scroll lock + ESC; native → BackHandler + accessibilityViewIsModal). Reanimated v3 fade + zoom open/close. Built-in close button using @expo/vector-icons Feather X. 10 exports: Dialog, DialogTrigger, DialogPortal, DialogOverlay, DialogContent, DialogClose, DialogHeader, DialogFooter, DialogTitle, DialogDescription. Consumer must mount <PortalHost /> from @rn-primitives/portal once high in the app tree.",
+  "registryDependencies": ["tokens"],
+  "dependencies": [
+    "@rn-primitives/dialog",
+    "@rn-primitives/portal",
+    "react-native-reanimated",
+    "@expo/vector-icons"
+  ],
+  "files": [
+    {
+      "source": "ui/dialog.tsx",
+      "path": "components/ui/dialog.tsx",
+      "type": "registry:ui"
+    }
+  ]
+}
